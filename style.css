@@ -32,10 +32,10 @@ h1 {
 }
 /* Coloring for drop-off (top border) */
 .mother-dropoff {
- border-top: 5px solid #8B8000;
+ border-top: 10px solid #8B8000;
 }
 .father-dropoff {
- border-top: 5px solid #00008B;
+ border-top: 10px solid #00008B;
 }
 /* Coloring for pick-up (bottom border) */
 .mother-pickup {
