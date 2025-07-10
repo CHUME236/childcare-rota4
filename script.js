@@ -43,6 +43,7 @@ function buildCalendars() {
      selectAppointment.innerHTML = `
 <option value="">--Appointment--</option>
 <option value="dentist">Dentist</option>
+<option value="drs">Drs</option>
 <option value="pe">PE</option>
 <option value="party">Party</option>
 <option value="swimming">Swimming</option>`;
