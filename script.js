@@ -93,4 +93,29 @@ function buildCalendars() {
        updateAppointmentStyle(cell, selectAppointment.value);
      });
      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
-     updateAppointmentStyle
+     updateAppointmentStyle(cell, selectAppointment.value);
+     cell.appendChild(header);
+     cell.appendChild(selectDropoff);
+     cell.appendChild(selectPickup);
+     cell.appendChild(selectAppointment);
+     cell.appendChild(ivyFlag);
+     cell.appendChild(everlyFlag);
+     cell.appendChild(commentBox);
+     monthGrid.appendChild(cell);
+   }
+   section.appendChild(monthGrid);
+   calendar.appendChild(section);
+ }
+}
+function updateDayCellStyle(cell, dropoff, pickup) {
+ cell.className = "day";
+ if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
+ if (pickup) cell.classList.add(`${pickup}-pickup`);
+}
+function updateAppointmentStyle(cell, appointment) {
+ if (appointment) {
+   cell.classList.add("has-appointment");
+ } else {
+   cell.classList.remove("has-appointment");
+ }
+}
