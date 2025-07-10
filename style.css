@@ -32,17 +32,17 @@ h1 {
 }
 /* Coloring for drop-off (top border) */
 .mother-dropoff {
- border-top: 10px solid #FFC0CB;
+ border-top: 15px solid #FFC0CB;
 }
 .father-dropoff {
- border-top: 10px solid #0096FF;
+ border-top: 15px solid #0096FF;
 }
 /* Coloring for pick-up (bottom border) */
 .mother-pickup {
- border-bottom: 5px solid #ffff66;
+ border-bottom: 10px solid #ffff66;
 }
 .father-pickup {
- border-bottom: 5px solid #66ff66;
+ border-bottom: 10px solid #66ff66;
 }
 /* Legend styling */
 .legend {
