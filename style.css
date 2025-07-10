@@ -71,18 +71,6 @@ h1 {
 input[type="checkbox"] {
  margin-right: 4px;
 }
-.week-overlay {
- position: absolute;
- top: 4px;
- right: 4px;
- background: #222;
- color: white;
- font-size: 0.75em;
- padding: 2px 6px;
- border-radius: 4px;
- z-index: 1;
- opacity: 0.9;
-}
 .legend {
  max-width: 400px;
  margin: 20px auto;
