@@ -18,7 +18,6 @@ function buildCalendars() {
      cell.className = "day";
      const currentDate = `${year}-${month + 1}-${day}`;
      const dow = new Date(year, month, day).getDay();
-     // Header
      const header = document.createElement("div");
      header.className = "day-header";
      header.textContent = `${day} ${daysOfWeek[dow]}`;
@@ -38,6 +37,38 @@ function buildCalendars() {
 <option value="father">Father</option>`;
      selectPickup.className = "select-caregiver pickup";
      selectPickup.value = localStorage.getItem(currentDate + "_pickup") || "";
+     // Appointment dropdown
+     const selectAppointment = document.createElement("select");
+     selectAppointment.innerHTML = `
+<option value="">--Appointment--</option>
+<option value="dentist">Dentist</option>
+<option value="pe">PE</option>
+<option value="party">Party</option>
+<option value="swimming">Swimming</option>`;
+     selectAppointment.className = "select-appointment";
+     selectAppointment.value = localStorage.getItem(currentDate + "_appointment") || "";
+     // Ivy flag
+     const ivyFlag = document.createElement("label");
+     ivyFlag.className = "checkbox-label";
+     const ivyCheckbox = document.createElement("input");
+     ivyCheckbox.type = "checkbox";
+     ivyCheckbox.checked = localStorage.getItem(currentDate + "_ivy") === "true";
+     ivyCheckbox.addEventListener("change", () => {
+       localStorage.setItem(currentDate + "_ivy", ivyCheckbox.checked);
+     });
+     ivyFlag.appendChild(ivyCheckbox);
+     ivyFlag.appendChild(document.createTextNode(" Ivy"));
+     // Everly flag
+     const everlyFlag = document.createElement("label");
+     everlyFlag.className = "checkbox-label";
+     const everlyCheckbox = document.createElement("input");
+     everlyCheckbox.type = "checkbox";
+     everlyCheckbox.checked = localStorage.getItem(currentDate + "_everly") === "true";
+     everlyCheckbox.addEventListener("change", () => {
+       localStorage.setItem(currentDate + "_everly", everlyCheckbox.checked);
+     });
+     everlyFlag.appendChild(everlyCheckbox);
+     everlyFlag.appendChild(document.createTextNode(" Everly"));
      // Comment box
      const commentBox = document.createElement("textarea");
      commentBox.className = "day-comment";
@@ -46,7 +77,7 @@ function buildCalendars() {
      commentBox.addEventListener("input", () => {
        localStorage.setItem(currentDate + "_comment", commentBox.value);
      });
-     // Change handlers
+     // Save dropdown changes
      selectDropoff.addEventListener("change", () => {
        localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
@@ -55,12 +86,18 @@ function buildCalendars() {
        localStorage.setItem(currentDate + "_pickup", selectPickup.value);
        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
      });
-     // Initial styling
+     selectAppointment.addEventListener("change", () => {
+       localStorage.setItem(currentDate + "_appointment", selectAppointment.value);
+     });
+     // Apply initial styles
      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
-     // Assemble cell
+     // Append all elements
      cell.appendChild(header);
      cell.appendChild(selectDropoff);
      cell.appendChild(selectPickup);
+     cell.appendChild(selectAppointment);
+     cell.appendChild(ivyFlag);
+     cell.appendChild(everlyFlag);
      cell.appendChild(commentBox);
      monthGrid.appendChild(cell);
    }
@@ -70,7 +107,7 @@ function buildCalendars() {
  }
 }
 function updateDayCellStyle(cell, dropoff, pickup) {
- cell.className = "day";
+ cell.className = "day"; // Reset
  if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
  if (pickup) cell.classList.add(`${pickup}-pickup`);
 }
