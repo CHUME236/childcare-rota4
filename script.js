@@ -21,12 +21,18 @@ function buildCalendars() {
      emptyCell.className = "day empty";
      monthGrid.appendChild(emptyCell);
    }
+   let weekCounter = 0;
    for (let day = 1; day <= daysInMonth; day++) {
      const date = new Date(year, month, day);
      const dow = (date.getDay() + 6) % 7; // Convert Sunday-start to Monday-start
+     if (dow === 0 || day === 1) weekCounter++;
      const currentDate = `${year}-${month + 1}-${day}`;
      const cell = document.createElement("div");
      cell.className = "day";
+     const weekOverlay = document.createElement("div");
+     weekOverlay.className = "week-overlay";
+     weekOverlay.textContent = weekCounter % 2 === 1 ? "Week 1" : "Week 2";
+     cell.appendChild(weekOverlay);
      const header = document.createElement("div");
      header.className = "day-header";
      header.textContent = `${day} ${daysOfWeek[dow]}`;
