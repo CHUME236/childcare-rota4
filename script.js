@@ -1,51 +1,57 @@
-const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const today = new Date();
-const currentMonth = today.getMonth();
-const currentYear = today.getFullYear();
-
-function buildCalendar(month, year) {
-const calendar = document.getElementById("calendar");
-calendar.innerHTML = "";
-
-const firstDay = new Date(year, month, 1).getDay();
-const totalDays = new Date(year, month + 1, 0).getDate();
-
-// Fill initial empty cells
-for (let i = 0; i < firstDay; i++) {
-calendar.appendChild(document.createElement("div"));
-}
-
-for (let day = 1; day <= totalDays; day++) {
-const cell = document.createElement("div");
-cell.className = "day";
-const date = `${year}-${month + 1}-${day}`;
-const saved = localStorage.getItem(date);
-
-const header = document.createElement("div");
-header.className = "day-header";
-header.textContent = `${day} ${daysOfWeek[new Date(year, month, day).getDay()]}`;
-
-const select = document.createElement("select");
-select.className = "select-caregiver";
-select.innerHTML = `<option value="">--Select--</option>
+document.addEventListener("DOMContentLoaded", buildCalendar);
+function buildCalendar() {
+ const calendar = document.getElementById("calendar");
+ calendar.innerHTML = ""; // Clear existing
+ const date = new Date();
+ const year = date.getFullYear();
+ const month = date.getMonth();
+ const daysInMonth = new Date(year, month + 1, 0).getDate();
+ const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+ for (let day = 1; day <= daysInMonth; day++) {
+   const cell = document.createElement("div");
+   cell.className = "day";
+   const currentDate = `${year}-${month + 1}-${day}`;
+   // Header
+   const header = document.createElement("div");
+   header.className = "day-header";
+   const dow = new Date(year, month, day).getDay();
+   header.textContent = `${day} ${daysOfWeek[dow]}`;
+   // Drop-off selector
+   const selectDropoff = document.createElement("select");
+   selectDropoff.innerHTML = `
+<option value="">--Drop-off--</option>
 <option value="mother">Mother</option>
 <option value="father">Father</option>`;
-
-if (saved) {
-select.value = saved;
-cell.classList.add(saved);
+   selectDropoff.className = "select-caregiver dropoff";
+   selectDropoff.value = localStorage.getItem(currentDate + "_dropoff") || "";
+   // Pick-up selector
+   const selectPickup = document.createElement("select");
+   selectPickup.innerHTML = `
+<option value="">--Pick-up--</option>
+<option value="mother">Mother</option>
+<option value="father">Father</option>`;
+   selectPickup.className = "select-caregiver pickup";
+   selectPickup.value = localStorage.getItem(currentDate + "_pickup") || "";
+   // Change handlers
+   selectDropoff.addEventListener("change", () => {
+     localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
+     updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+   });
+   selectPickup.addEventListener("change", () => {
+     localStorage.setItem(currentDate + "_pickup", selectPickup.value);
+     updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+   });
+   // Initial style
+   updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+   // Append to cell
+   cell.appendChild(header);
+   cell.appendChild(selectDropoff);
+   cell.appendChild(selectPickup);
+   calendar.appendChild(cell);
+ }
 }
-
-select.addEventListener("change", () => {
-localStorage.setItem(date, select.value);
-cell.className = "day";
-if (select.value) cell.classList.add(select.value);
-});
-
-cell.appendChild(header);
-cell.appendChild(select);
-calendar.appendChild(cell);
+function updateDayCellStyle(cell, dropoff, pickup) {
+ cell.className = "day"; // Reset
+ if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
+ if (pickup) cell.classList.add(`${pickup}-pickup`);
 }
-}
-
-buildCalendar(currentMonth, currentYear);
