@@ -1,0 +1,43 @@
+body {
+font-family: Arial, sans-serif;
+margin: 20px;
+background-color: #f8f8f8;
+}
+
+h1 {
+text-align: center;
+}
+
+#calendar {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: 10px;
+max-width: 900px;
+margin: 0 auto;
+}
+
+.day {
+background: white;
+padding: 10px;
+border: 1px solid #ccc;
+text-align: center;
+min-height: 120px;
+position: relative;
+}
+
+.day-header {
+font-weight: bold;
+}
+
+.select-caregiver {
+margin-top: 10px;
+width: 100%;
+}
+
+.mother {
+background-color: #ffff99;
+}
+
+.father {
+background-color: #99ff99;
+}
