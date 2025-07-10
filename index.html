@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Childcare Rota</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Childcare Rota</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<h1>Childcare Rota (July–December 2025)</h1>
-<div id="calendar"></div>
-<script src="script.js" defer></script>
+  <h1>Childcare Rota (July–December 2025)</h1>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div><span class="legend-box" style="border-top: 15px solid #FFC0CB;"></span> Mother Drop-off</div>
+    <div><span class="legend-box" style="border-top: 15px solid #0096FF;"></span> Father Drop-off</div>
+    <div><span class="legend-box" style="border-bottom: 10px solid #ffff66;"></span> Mother Pick-up</div>
+    <div><span class="legend-box" style="border-bottom: 10px solid #66ff66;"></span> Father Pick-up</div>
+    <div><span class="legend-box" style="background-color: #ffe5e5;"></span> Appointment</div>
+  </div>
+
+  <div id="calendar"></div>
+  <script src="script.js" defer></script>
 </body>
 </html>
