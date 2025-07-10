@@ -13,15 +13,22 @@ function buildCalendars() {
    const monthGrid = document.createElement("div");
    monthGrid.className = "month-grid";
    const daysInMonth = new Date(year, month + 1, 0).getDate();
+   let weekTypeToggle = true; // Start with Week 1
    for (let day = 1; day <= daysInMonth; day++) {
+     const dow = new Date(year, month, day).getDay();
+     if (dow === 0 || day === 1) {
+       weekTypeToggle = !weekTypeToggle; // Toggle week
+     }
+     const currentDate = `${year}-${month + 1}-${day}`;
      const cell = document.createElement("div");
      cell.className = "day";
-     const currentDate = `${year}-${month + 1}-${day}`;
-     const dow = new Date(year, month, day).getDay();
+     const weekOverlay = document.createElement("div");
+     weekOverlay.className = "week-overlay";
+     weekOverlay.textContent = weekTypeToggle ? "Week 1" : "Week 2";
+     cell.appendChild(weekOverlay);
      const header = document.createElement("div");
      header.className = "day-header";
      header.textContent = `${day} ${daysOfWeek[dow]}`;
-     // Drop-off
      const selectDropoff = document.createElement("select");
      selectDropoff.className = "select-caregiver dropoff";
      selectDropoff.innerHTML = `
@@ -29,7 +36,6 @@ function buildCalendars() {
 <option value="mother">Mother</option>
 <option value="father">Father</option>`;
      selectDropoff.value = localStorage.getItem(currentDate + "_dropoff") || "";
-     // Pick-up
      const selectPickup = document.createElement("select");
      selectPickup.className = "select-caregiver pickup";
      selectPickup.innerHTML = `
@@ -37,18 +43,15 @@ function buildCalendars() {
 <option value="mother">Mother</option>
 <option value="father">Father</option>`;
      selectPickup.value = localStorage.getItem(currentDate + "_pickup") || "";
-     // Appointment
      const selectAppointment = document.createElement("select");
      selectAppointment.className = "select-appointment";
      selectAppointment.innerHTML = `
 <option value="">--Appointment--</option>
 <option value="dentist">Dentist</option>
-<option value="drs">Drs</option>
 <option value="pe">PE</option>
 <option value="party">Party</option>
 <option value="swimming">Swimming</option>`;
      selectAppointment.value = localStorage.getItem(currentDate + "_appointment") || "";
-     // Flags: Ivy & Everly
      const ivyFlag = document.createElement("label");
      ivyFlag.className = "checkbox-label";
      const ivyCheckbox = document.createElement("input");
@@ -69,7 +72,6 @@ function buildCalendars() {
      );
      everlyFlag.appendChild(everlyCheckbox);
      everlyFlag.appendChild(document.createTextNode(" Everly"));
-     // Comment box
      const commentBox = document.createElement("textarea");
      commentBox.className = "day-comment";
      commentBox.placeholder = "Add notes...";
@@ -77,7 +79,6 @@ function buildCalendars() {
      commentBox.addEventListener("input", () =>
        localStorage.setItem(currentDate + "_comment", commentBox.value)
      );
-     // Event handlers
      selectDropoff.addEventListener("change", () => {
        localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
@@ -90,10 +91,8 @@ function buildCalendars() {
        localStorage.setItem(currentDate + "_appointment", selectAppointment.value);
        updateAppointmentStyle(cell, selectAppointment.value);
      });
-     // Apply saved styles
      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
      updateAppointmentStyle(cell, selectAppointment.value);
-     // Append elements
      cell.appendChild(header);
      cell.appendChild(selectDropoff);
      cell.appendChild(selectPickup);
