@@ -7,11 +7,17 @@ h1 {
  text-align: center;
 }
 #calendar {
+ display: flex;
+ flex-direction: column;
+ gap: 40px;
+ max-width: 1000px;
+ margin: 0 auto;
+}
+.month-grid {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
  gap: 10px;
- margin: 20px auto;
- max-width: 900px;
+ margin-bottom: 30px;
 }
 .day {
  background: white;
@@ -44,7 +50,7 @@ h1 {
 .father-pickup {
  border-bottom: 10px solid #66ff66;
 }
-/* Legend styling */
+/* Legend styling (optional) */
 .legend {
  max-width: 400px;
  margin: 20px auto;
