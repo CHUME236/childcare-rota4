@@ -50,7 +50,7 @@ h1 {
 .father-pickup {
  border-bottom: 10px solid #66ff66;
 }
-/* Legend styling (optional) */
+/* Legend styling */
 .legend {
  max-width: 400px;
  margin: 20px auto;
@@ -64,4 +64,14 @@ h1 {
  height: 20px;
  margin-right: 8px;
  vertical-align: middle;
+}
+/* New: Comment box styling */
+.day-comment {
+ width: 100%;
+ margin-top: 6px;
+ padding: 6px;
+ resize: vertical;
+ min-height: 40px;
+ font-size: 0.9em;
+ box-sizing: border-box;
 }
