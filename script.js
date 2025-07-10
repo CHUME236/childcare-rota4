@@ -4,7 +4,7 @@ function buildCalendars() {
  calendar.innerHTML = "";
  const year = 2025;
  const months = ["July", "August", "September", "October", "November", "December"];
- const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+ const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
  for (let month = 6; month <= 11; month++) {
    const section = document.createElement("section");
    const title = document.createElement("h2");
@@ -13,19 +13,20 @@ function buildCalendars() {
    const monthGrid = document.createElement("div");
    monthGrid.className = "month-grid";
    const daysInMonth = new Date(year, month + 1, 0).getDate();
-   let weekTypeToggle = true; // Start with Week 1
+   const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+   // Adjust for Monday-starting week
+   const offset = (firstDay + 6) % 7;
+   for (let i = 0; i < offset; i++) {
+     const emptyCell = document.createElement("div");
+     emptyCell.className = "day empty";
+     monthGrid.appendChild(emptyCell);
+   }
    for (let day = 1; day <= daysInMonth; day++) {
-     const dow = new Date(year, month, day).getDay();
-     if (dow === 0 || day === 1) {
-       weekTypeToggle = !weekTypeToggle; // Toggle week
-     }
+     const date = new Date(year, month, day);
+     const dow = (date.getDay() + 6) % 7; // Convert Sunday-start to Monday-start
      const currentDate = `${year}-${month + 1}-${day}`;
      const cell = document.createElement("div");
      cell.className = "day";
-     const weekOverlay = document.createElement("div");
-     weekOverlay.className = "week-overlay";
-     weekOverlay.textContent = weekTypeToggle ? "Week 1" : "Week 2";
-     cell.appendChild(weekOverlay);
      const header = document.createElement("div");
      header.className = "day-header";
      header.textContent = `${day} ${daysOfWeek[dow]}`;
@@ -92,29 +93,4 @@ function buildCalendars() {
        updateAppointmentStyle(cell, selectAppointment.value);
      });
      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
-     updateAppointmentStyle(cell, selectAppointment.value);
-     cell.appendChild(header);
-     cell.appendChild(selectDropoff);
-     cell.appendChild(selectPickup);
-     cell.appendChild(selectAppointment);
-     cell.appendChild(ivyFlag);
-     cell.appendChild(everlyFlag);
-     cell.appendChild(commentBox);
-     monthGrid.appendChild(cell);
-   }
-   section.appendChild(monthGrid);
-   calendar.appendChild(section);
- }
-}
-function updateDayCellStyle(cell, dropoff, pickup) {
- cell.className = "day";
- if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
- if (pickup) cell.classList.add(`${pickup}-pickup`);
-}
-function updateAppointmentStyle(cell, appointment) {
- if (appointment) {
-   cell.classList.add("has-appointment");
- } else {
-   cell.classList.remove("has-appointment");
- }
-}
+     updateAppointmentStyle
