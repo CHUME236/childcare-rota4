@@ -23,34 +23,56 @@ h1 {
  background: white;
  padding: 10px;
  border: 1px solid #ccc;
- min-height: 100px;
+ min-height: 120px;
  position: relative;
 }
 .day-header {
  font-weight: bold;
  margin-bottom: 5px;
 }
-.select-caregiver {
+.select-caregiver,
+.select-appointment {
  display: block;
  width: 100%;
  margin: 4px 0;
  padding: 4px;
+ font-size: 0.95em;
 }
-/* Coloring for drop-off (top border) */
+/* Drop-off top border colors */
 .mother-dropoff {
  border-top: 15px solid #FFC0CB;
 }
 .father-dropoff {
  border-top: 15px solid #0096FF;
 }
-/* Coloring for pick-up (bottom border) */
+/* Pick-up bottom border colors */
 .mother-pickup {
  border-bottom: 10px solid #ffff66;
 }
 .father-pickup {
  border-bottom: 10px solid #66ff66;
 }
-/* Legend styling */
+/* Comment box */
+.day-comment {
+ width: 100%;
+ margin-top: 6px;
+ padding: 6px;
+ resize: vertical;
+ min-height: 40px;
+ font-size: 0.9em;
+ box-sizing: border-box;
+}
+/* Checkbox labels */
+.checkbox-label {
+ display: inline-block;
+ margin-right: 10px;
+ font-size: 0.9em;
+ margin-top: 4px;
+}
+input[type="checkbox"] {
+ margin-right: 4px;
+}
+/* Legend (optional) */
 .legend {
  max-width: 400px;
  margin: 20px auto;
@@ -64,14 +86,4 @@ h1 {
  height: 20px;
  margin-right: 8px;
  vertical-align: middle;
-}
-/* New: Comment box styling */
-.day-comment {
- width: 100%;
- margin-top: 6px;
- padding: 6px;
- resize: vertical;
- min-height: 40px;
- font-size: 0.9em;
- box-sizing: border-box;
 }
