@@ -120,18 +120,20 @@ input[type="checkbox"] {
   vertical-align: middle;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+#showSummaryBtn {
+  display: block;
+  margin: 10px auto 30px auto;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
+#summary label {
+  font-weight: bold;
 }
 
-th {
-  background-color: #f0f0f0;
+#summary select {
+  margin-left: 10px;
+  margin-bottom: 15px;
+  padding: 4px;
 }
