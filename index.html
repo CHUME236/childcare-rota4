@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Childcare Rota</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -18,11 +18,12 @@
     <div><span class="legend-box" style="background-color: #ffe5e5;"></span> Appointment</div>
   </div>
 
-  <button id="showSummaryBtn">Show Summary</button>
+  <div style="text-align:center; margin-bottom:15px;">
+    <button id="showSummaryBtn">Show Summary</button>
+  </div>
 
   <div id="calendar"></div>
-
-  <div id="summary" style="display:none; max-width: 800px; margin: 20px auto; background: #fff; padding: 15px; border: 1px solid #ccc;"></div>
+  <div id="summary" style="display:none;"></div>
 
   <script src="script.js" defer></script>
 </body>
