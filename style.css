@@ -120,20 +120,51 @@ input[type="checkbox"] {
   vertical-align: middle;
 }
 
-#showSummaryBtn {
-  display: block;
-  margin: 10px auto 30px auto;
-  padding: 10px 20px;
-  font-size: 1em;
-  cursor: pointer;
+#summary {
+  max-width: 1000px;
+  margin: 0 auto 40px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
 }
 
 #summary label {
+  margin-right: 10px;
   font-weight: bold;
 }
 
 #summary select {
-  margin-left: 10px;
-  margin-bottom: 15px;
+  margin-right: 20px;
   padding: 4px;
+}
+
+#summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#summary th,
+#summary td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+}
+
+.highlight-mother {
+  background-color: #fffacd; /* pale yellow */
+}
+
+.highlight-father {
+  background-color: #add8e6; /* light blue */
+}
+
+.highlight-both {
+  background-color: #ffc0cb; /* pink */
+}
+
+button#exportCsvBtn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
 }
