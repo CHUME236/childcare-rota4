@@ -2,44 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Childcare Rota</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Childcare Rota (July–December 2025)</h1>
 
-  <!-- Buttons -->
   <div class="button-container">
     <button id="showCalendarBtn">Show Calendar</button>
     <button id="showSummaryBtn">Show Summary</button>
     <button id="exportCsvBtn">Export Summary to CSV</button>
   </div>
 
-  <!-- Legend -->
   <div class="legend">
-    <div><span class="legend-box" style="border-top: 15px solid #FFC0CB;"></span> Mother Drop-off</div>
-    <div><span class="legend-box" style="border-top: 15px solid #0096FF;"></span> Father Drop-off</div>
-    <div><span class="legend-box" style="border-bottom: 10px solid #ffff66;"></span> Mother Pick-up</div>
-    <div><span class="legend-box" style="border-bottom: 10px solid #66ff66;"></span> Father Pick-up</div>
-    <div><span class="legend-box" style="background-color: #ffe5e5;"></span> Appointment</div>
+    <div><span class="legend-box" style="border-top:15px solid #FFC0CB"></span>Mother Drop‑off</div>
+    <div><span class="legend-box" style="border-top:15px solid #0096FF"></span>Father Drop‑off</div>
+    <div><span class="legend-box" style="border-bottom:10px solid #ffff66"></span>Mother Pick‑up</div>
+    <div><span class="legend-box" style="border-bottom:10px solid #66ff66"></span>Father Pick‑up</div>
+    <div><span class="legend-box" style="background:#ffe5e5"></span>Appointment</div>
   </div>
 
-  <!-- Calendar -->
   <div id="calendar"></div>
 
-  <!-- Summary -->
-  <div id="summary" style="display: none;">
-    <h2>Summary View</h2>
-    <div class="filters">
-      <label for="filterCaregiver">Filter by Caregiver:</label>
+  <div id="summary" style="display:none;">
+    <h2>Summary</h2>
+    <div id="filters">
+      <label for="filterCaregiver">Caregiver:</label>
       <select id="filterCaregiver">
         <option value="all">All</option>
         <option value="mother">Mother</option>
         <option value="father">Father</option>
       </select>
-
-      <label for="filterChild">Filter by Child:</label>
+      <label for="filterChild">Child:</label>
       <select id="filterChild">
         <option value="all">All</option>
         <option value="ivy">Ivy</option>
@@ -49,14 +44,7 @@
     <table>
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Day</th>
-          <th>Drop-off</th>
-          <th>Pick-up</th>
-          <th>Appointment</th>
-          <th>Ivy</th>
-          <th>Everly</th>
-          <th>Comments</th>
+          <th>Date</th><th>Day</th><th>Drop-off</th><th>Pick-up</th><th>Appointment</th><th>Ivy</th><th>Everly</th><th>Notes</th>
         </tr>
       </thead>
       <tbody id="summaryBody"></tbody>
