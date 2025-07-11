@@ -102,3 +102,188 @@ function buildCalendars() {
       );
       everlyFlag.appendChild(everlyCheckbox);
       everlyFlag.appendChild(document.createTextNode(" Everly"));
+
+      // Comment box
+      const commentBox = document.createElement("textarea");
+      commentBox.className = "day-comment";
+      commentBox.placeholder = "Add notes...";
+      commentBox.value = localStorage.getItem(currentDate + "_comment") || "";
+      commentBox.addEventListener("input", () =>
+        localStorage.setItem(currentDate + "_comment", commentBox.value)
+      );
+
+      // Event listeners for selects to update styles and storage
+      selectDropoff.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
+        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+      });
+      selectPickup.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_pickup", selectPickup.value);
+        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+      });
+      selectAppointment.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_appointment", selectAppointment.value);
+        updateAppointmentStyle(cell, selectAppointment.value);
+      });
+
+      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+      updateAppointmentStyle(cell, selectAppointment.value);
+
+      // Append all to cell
+      cell.appendChild(header);
+      cell.appendChild(selectDropoff);
+      cell.appendChild(selectPickup);
+      cell.appendChild(selectAppointment);
+      cell.appendChild(ivyFlag);
+      cell.appendChild(everlyFlag);
+      cell.appendChild(commentBox);
+
+      monthGrid.appendChild(cell);
+    }
+    section.appendChild(monthGrid);
+    calendar.appendChild(section);
+  }
+}
+
+function updateDayCellStyle(cell, dropoff, pickup) {
+  cell.className = "day";
+  if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
+  if (pickup) cell.classList.add(`${pickup}-pickup`);
+}
+
+function updateAppointmentStyle(cell, appointment) {
+  if (appointment) {
+    cell.classList.add("has-appointment");
+  } else {
+    cell.classList.remove("has-appointment");
+  }
+}
+
+function showSummary() {
+  const summaryDiv = document.getElementById("summary");
+  const calendarDiv = document.getElementById("calendar");
+  const btn = document.getElementById("showSummaryBtn");
+
+  if (summaryDiv.style.display === "block") {
+    // Hide summary, show calendar
+    summaryDiv.style.display = "none";
+    calendarDiv.style.display = "flex";
+    btn.textContent = "Show Summary";
+    summaryDiv.innerHTML = "";
+    return;
+  }
+
+  // Show summary, hide calendar
+  calendarDiv.style.display = "none";
+  summaryDiv.style.display = "block";
+  btn.textContent = "Show Calendar";
+
+  // Build caregiver filter UI
+  summaryDiv.innerHTML = `
+    <label for="caregiverFilter">Filter by caregiver:</label>
+    <select id="caregiverFilter">
+      <option value="all">All</option>
+      <option value="mother">Mother</option>
+      <option value="father">Father</option>
+    </select>
+    <div id="summaryContent"></div>
+  `;
+
+  document.getElementById("caregiverFilter").addEventListener("change", () => {
+    buildSummary(document.getElementById("caregiverFilter").value);
+  });
+
+  buildSummary("all");
+}
+
+function buildSummary(filter) {
+  const summaryContent = document.getElementById("summaryContent");
+  summaryContent.innerHTML = "";
+
+  const year = 2025;
+  const months = ["July", "August", "September", "October", "November", "December"];
+
+  // Collect all day entries from localStorage that have any data
+  let entries = [];
+
+  for (let month = 6; month <= 11; month++) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDate = `${year}-${month + 1}-${day}`;
+      const dropoff = localStorage.getItem(currentDate + "_dropoff") || "";
+      const pickup = localStorage.getItem(currentDate + "_pickup") || "";
+      const appointment = localStorage.getItem(currentDate + "_appointment") || "";
+      const ivy = localStorage.getItem(currentDate + "_ivy") === "true";
+      const everly = localStorage.getItem(currentDate + "_everly") === "true";
+      const comment = localStorage.getItem(currentDate + "_comment") || "";
+
+      if (!dropoff && !pickup && !appointment && !ivy && !everly && !comment) {
+        continue; // Skip empty days
+      }
+
+      // Apply caregiver filter
+      if (filter === "mother" && dropoff !== "mother" && pickup !== "mother") continue;
+      if (filter === "father" && dropoff !== "father" && pickup !== "father") continue;
+
+      entries.push({
+        date: new Date(year, month, day),
+        dateString: `${day} ${months[month - 6]} ${year}`,
+        dropoff,
+        pickup,
+        appointment,
+        ivy,
+        everly,
+        comment,
+      });
+    }
+  }
+
+  if (entries.length === 0) {
+    summaryContent.textContent = "No entries found for the selected filter.";
+    return;
+  }
+
+  // Sort entries by date ascending
+  entries.sort((a, b) => a.date - b.date);
+
+  // Build a table to show summary
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  // Table Header
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr style="background:#ddd;">
+      <th style="border:1px solid #ccc; padding:6px;">Date</th>
+      <th style="border:1px solid #ccc; padding:6px;">Drop-off</th>
+      <th style="border:1px solid #ccc; padding:6px;">Pick-up</th>
+      <th style="border:1px solid #ccc; padding:6px;">Appointment</th>
+      <th style="border:1px solid #ccc; padding:6px;">Ivy</th>
+      <th style="border:1px solid #ccc; padding:6px;">Everly</th>
+      <th style="border:1px solid #ccc; padding:6px;">Notes</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  // Table Body
+  const tbody = document.createElement("tbody");
+
+  entries.forEach((entry) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="border:1px solid #ccc; padding:6px;">${entry.dateString}</td>
+      <td style="border:1px solid #ccc; padding:6px;">${entry.dropoff || "-"}</td>
+      <td style="border:1px solid #ccc; padding:6px;">${entry.pickup || "-"}</td>
+      <td style="border:1px solid #ccc; padding:6px;">${entry.appointment || "-"}</td>
+      <td style="border:1px solid #ccc; padding:6px; text-align:center;">${entry.ivy ? "✔" : ""}</td>
+      <td style="border:1px solid #ccc; padding:6px; text-align:center;">${entry.everly ? "✔" : ""}</td>
+      <td style="border:1px solid #ccc; padding:6px;">${entry.comment || "-"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  summaryContent.appendChild(table);
+}
