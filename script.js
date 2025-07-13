@@ -1,5 +1,3 @@
-// Full updated JS including all necessary fixes to make the summary section work correctly
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
   getAuth,
@@ -200,41 +198,68 @@ function buildSummary() {
   const fc = filterCaregiver.value.toLowerCase();
   const ch = filterChild.value.toLowerCase();
 
-  const seenDates = new Set();
-  Object.keys(calendarData).forEach((key) => {
+  const grouped = {};
+
+  // Group all entries by date
+  for (const key in calendarData) {
     const val = calendarData[key];
-    if (!val && val !== false) return;
+    if (!val && val !== false) continue;
+
     const [date, type] = key.split("_");
-    if (!date || !type) return;
+    if (!date || !type) continue;
 
-    const matchedCaregiver = ["dropoff", "pickup"].includes(type) && (!fc || val.toLowerCase() === fc);
-    const matchedChild = ["ivy", "everly"].includes(type) && (!ch || ch === type);
-    const matchedOther = ["appointment", "comment"].includes(type);
+    if (!grouped[date]) grouped[date] = {};
+    grouped[date][type] = val;
+  }
 
-    if (!(matchedCaregiver || matchedChild || matchedOther)) return;
+  for (const date in grouped) {
+    const day = grouped[date];
+
+    // Filter by caregiver
+    if (
+      fc &&
+      (!day.dropoff || day.dropoff.toLowerCase() !== fc) &&
+      (!day.pickup || day.pickup.toLowerCase() !== fc)
+    ) {
+      continue;
+    }
+
+    // Filter by child
+    if (ch && !day[ch]) {
+      continue;
+    }
 
     const tr = document.createElement("tr");
+
     const dateTd = document.createElement("td");
     dateTd.textContent = date;
     tr.appendChild(dateTd);
 
-    const typeTd = document.createElement("td");
-    const map = { dropoff: "Drop-off", pickup: "Pick-up", appointment: "Appointment", ivy: "Ivy", everly: "Everly", comment: "Comment" };
-    typeTd.textContent = map[type] || type;
-    tr.appendChild(typeTd);
+    const infoTd = document.createElement("td");
+    let info = [];
 
-    const valTd = document.createElement("td");
-    valTd.textContent = typeof val === "boolean" ? (val ? "Yes" : "No") : val;
-    tr.appendChild(valTd);
+    if (day.dropoff) info.push(`Drop-off: ${day.dropoff}`);
+    if (day.pickup) info.push(`Pick-up: ${day.pickup}`);
+    if (day.appointment) info.push(`Appointment: ${day.appointment}`);
+    if (day.ivy) info.push("Ivy");
+    if (day.everly) info.push("Everly");
+    if (day.comment) info.push(`Notes: ${day.comment}`);
 
-    if (["dropoff", "pickup"].includes(type)) {
-      tr.classList.add(val === "mother" ? "summary-mother-only" : "summary-father-only");
-    } else if (["ivy", "everly"].includes(type)) {
+    infoTd.textContent = info.join(" | ");
+    tr.appendChild(infoTd);
+
+    if (day.dropoff === "mother" || day.pickup === "mother") {
+      tr.classList.add("summary-mother-only");
+    } else if (day.dropoff === "father" || day.pickup === "father") {
+      tr.classList.add("summary-father-only");
+    }
+
+    if (day.ivy || day.everly) {
       tr.classList.add("summary-child");
     }
 
     summaryBody.appendChild(tr);
-  });
+  }
 }
 
 function exportCSV() {
