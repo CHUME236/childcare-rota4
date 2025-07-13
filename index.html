@@ -1,89 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Childcare Rota</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Childcare Rota with Firebase Login</title>
+<style>
+  /* Include your CSS below (see next section) */
+</style>
 </head>
 <body>
-  <h1>Childcare Rota (July–December 2025)</h1>
 
-  <!-- LOGIN/SIGNUP SECTION -->
-  <div id="authSection" style="max-width: 400px; margin: auto; padding: 10px; background: #fff; border: 1px solid #ccc;">
-    <div id="loginForm">
-      <h2>Login</h2>
-      <input type="text" id="loginUsername" placeholder="Username" /><br />
-      <input type="password" id="loginPassword" placeholder="Password" /><br />
-      <button id="loginBtn">Login</button>
-      <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
-      <p id="loginError" style="color:red;"></p>
-    </div>
-
-    <div id="signupForm" style="display:none;">
-      <h2>Sign Up</h2>
-      <input type="text" id="signupUsername" placeholder="Username" /><br />
-      <input type="password" id="signupPassword" placeholder="Password" /><br />
-      <button id="signupBtn">Sign Up</button>
-      <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
-      <p id="signupError" style="color:red;"></p>
-    </div>
+<header>
+  <h1>Childcare Rota</h1>
+  <div id="auth">
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+    <button id="signup-btn">Sign Up</button>
+    <button id="logout-btn" style="display:none;">Logout</button>
+    <div id="auth-message"></div>
   </div>
+</header>
 
-  <!-- LOGGED IN USER INFO & LOGOUT -->
-  <div id="userInfo" style="max-width: 400px; margin: auto; padding: 10px; background: #e0ffe0; border: 1px solid #0c0; display:none;">
-    Logged in as <span id="currentUser"></span> 
-    <button id="logoutBtn" style="margin-left:20px;">Logout</button>
-  </div>
+<nav>
+  <button id="showCalendarBtn">Show Calendar</button>
+  <button id="showSummaryBtn">Show Summary</button>
+  <button id="exportCsvBtn">Export CSV</button>
+  <select id="filterCaregiver">
+    <option value="">Filter by Caregiver</option>
+    <option value="mother">Mother</option>
+    <option value="father">Father</option>
+  </select>
+  <select id="filterChild">
+    <option value="">Filter by Child</option>
+    <option value="ivy">Ivy</option>
+    <option value="everly">Everly</option>
+  </select>
+</nav>
 
-  <!-- MAIN APP BUTTONS -->
-  <div class="button-container" style="display:none;" id="appButtons">
-    <button id="showCalendarBtn">Show Calendar</button>
-    <button id="showSummaryBtn">Show Summary</button>
-    <button id="exportCsvBtn">Export Summary to CSV</button>
-    <button id="saveDataBtn">Save Data to Server</button>
-    <button id="loadDataBtn">Load Data from Server</button>
-  </div>
-
-  <!-- LEGEND -->
-  <div class="legend" style="display:none;" id="legend">
-    <div><span class="legend-box" style="border-top:15px solid #FFC0CB"></span>Mother Drop‑off</div>
-    <div><span class="legend-box" style="border-top:15px solid #0096FF"></span>Father Drop‑off</div>
-    <div><span class="legend-box" style="border-bottom:10px solid #ffff66"></span>Mother Pick‑up</div>
-    <div><span class="legend-box" style="border-bottom:10px solid #66ff66"></span>Father Pick‑up</div>
-    <div><span class="legend-box" style="background:#ffe5e5"></span>Appointment</div>
-  </div>
-
-  <!-- CALENDAR -->
-  <div id="calendar" style="display:none;"></div>
-
-  <!-- SUMMARY -->
-  <div id="summary" style="display:none;">
-    <h2>Summary</h2>
-    <div id="filters">
-      <label for="filterCaregiver">Caregiver:</label>
-      <select id="filterCaregiver">
-        <option value="all">All</option>
-        <option value="mother">Mother</option>
-        <option value="father">Father</option>
-      </select>
-      <label for="filterChild">Child:</label>
-      <select id="filterChild">
-        <option value="all">All</option>
-        <option value="ivy">Ivy</option>
-        <option value="everly">Everly</option>
-      </select>
-    </div>
-    <table>
+<main>
+  <section id="calendar" style="display:flex; flex-wrap: wrap; gap:1em;"></section>
+  <section id="summary" style="display:none;">
+    <table border="1">
       <thead>
-        <tr>
-          <th>Date</th><th>Day</th><th>Drop-off</th><th>Pick-up</th><th>Appointment</th><th>Ivy</th><th>Everly</th><th>Notes</th>
-        </tr>
+        <tr><th>Date</th><th>Details</th></tr>
       </thead>
       <tbody id="summaryBody"></tbody>
     </table>
-  </div>
+  </section>
+</main>
 
-  <script src="script.js" defer></script>
+<script type="module">
+  /* Your JavaScript below (see JS section) */
+</script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+
 </body>
 </html>
