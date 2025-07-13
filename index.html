@@ -1,72 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Childcare Rota</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>Childcare Calendar Rota</h1>
 
-  <header>
-    <h1>Childcare Rota</h1>
-    <div class="button-group">
-      <button id="showCalendarBtn">View Calendar</button>
-      <button id="showSummaryBtn">View Summary</button>
-      <button id="exportCsvBtn">Export CSV</button>
-    </div>
-    <div class="filters">
-      <label>
-        Filter by Caregiver:
-        <select id="filterCaregiver">
-          <option value="all">All</option>
-          <option value="mother">Mother</option>
-          <option value="father">Father</option>
-        </select>
-      </label>
-      <label>
-        Filter by Child:
-        <select id="filterChild">
-          <option value="all">All</option>
-          <option value="ivy">Ivy</option>
-          <option value="everly">Everly</option>
-        </select>
-      </label>
-    </div>
-  </header>
+  <div class="button-container">
+    <button onclick="showCalendar()">Calendar View</button>
+    <button onclick="showSummary()">Summary View</button>
+    <button onclick="exportSummaryToCSV()">Export Summary to CSV</button>
+  </div>
 
-  <main>
-    <div id="calendar"></div>
+  <div id="filters" style="display: none;">
+    <label>Filter by Caregiver:
+      <select id="caregiverFilter" onchange="renderSummaryTable()">
+        <option value="all">All</option>
+        <option value="mother">Mother</option>
+        <option value="father">Father</option>
+      </select>
+    </label>
+    <label>Filter by Child:
+      <select id="childFilter" onchange="renderSummaryTable()">
+        <option value="all">All</option>
+        <option value="ivy">Ivy</option>
+        <option value="everly">Everly</option>
+      </select>
+    </label>
+  </div>
 
-    <section id="summary" style="display:none;">
-      <h2>Summary</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Day</th>
-            <th>Drop-off</th>
-            <th>Pick-up</th>
-            <th>Appointment</th>
-            <th>Ivy</th>
-            <th>Everly</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="summaryBody"></tbody>
-      </table>
-    </section>
-  </main>
+  <div id="calendar"></div>
+  <div id="summary" style="display: none;"></div>
 
-  <footer>
-    <p><strong>Legend:</strong> <span class="legend mother">Mother</span> <span class="legend father">Father</span> <span class="legend appointment">Appointment</span></p>
-  </footer>
+  <div class="legend">
+    <div><span class="legend-box" style="background:#FFC0CB;"></span>Mother Drop-off</div>
+    <div><span class="legend-box" style="background:#0096FF;"></span>Father Drop-off</div>
+    <div><span class="legend-box" style="background:#ffff66;"></span>Mother Pick-up</div>
+    <div><span class="legend-box" style="background:#66ff66;"></span>Father Pick-up</div>
+    <div><span class="legend-box" style="background:#ffe5e5;"></span>Appointment</div>
+  </div>
 
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
+  <!-- Firebase Config (optional if integrating later) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4MhIUUWhnhF-UdqUkZqg_WeiSN0jUjx8",
+      authDomain: "childcare-rota.firebaseapp.com",
+      projectId: "childcare-rota",
+      storageBucket: "childcare-rota.appspot.com",
+      messagingSenderId: "884910967236",
+      appId: "1:884910967236:web:e6434fef7306bb0be67c91"
+    };
+    const app = initializeApp(firebaseConfig);
+  </script>
 
-  <!-- Main script -->
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>
