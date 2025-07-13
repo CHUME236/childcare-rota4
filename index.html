@@ -9,13 +9,44 @@
 <body>
   <h1>Childcare Rota (July–December 2025)</h1>
 
-  <div class="button-container">
+  <!-- LOGIN/SIGNUP SECTION -->
+  <div id="authSection" style="max-width: 400px; margin: auto; padding: 10px; background: #fff; border: 1px solid #ccc;">
+    <div id="loginForm">
+      <h2>Login</h2>
+      <input type="text" id="loginUsername" placeholder="Username" /><br />
+      <input type="password" id="loginPassword" placeholder="Password" /><br />
+      <button id="loginBtn">Login</button>
+      <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+      <p id="loginError" style="color:red;"></p>
+    </div>
+
+    <div id="signupForm" style="display:none;">
+      <h2>Sign Up</h2>
+      <input type="text" id="signupUsername" placeholder="Username" /><br />
+      <input type="password" id="signupPassword" placeholder="Password" /><br />
+      <button id="signupBtn">Sign Up</button>
+      <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+      <p id="signupError" style="color:red;"></p>
+    </div>
+  </div>
+
+  <!-- LOGGED IN USER INFO & LOGOUT -->
+  <div id="userInfo" style="max-width: 400px; margin: auto; padding: 10px; background: #e0ffe0; border: 1px solid #0c0; display:none;">
+    Logged in as <span id="currentUser"></span> 
+    <button id="logoutBtn" style="margin-left:20px;">Logout</button>
+  </div>
+
+  <!-- MAIN APP BUTTONS -->
+  <div class="button-container" style="display:none;" id="appButtons">
     <button id="showCalendarBtn">Show Calendar</button>
     <button id="showSummaryBtn">Show Summary</button>
     <button id="exportCsvBtn">Export Summary to CSV</button>
+    <button id="saveDataBtn">Save Data to Server</button>
+    <button id="loadDataBtn">Load Data from Server</button>
   </div>
 
-  <div class="legend">
+  <!-- LEGEND -->
+  <div class="legend" style="display:none;" id="legend">
     <div><span class="legend-box" style="border-top:15px solid #FFC0CB"></span>Mother Drop‑off</div>
     <div><span class="legend-box" style="border-top:15px solid #0096FF"></span>Father Drop‑off</div>
     <div><span class="legend-box" style="border-bottom:10px solid #ffff66"></span>Mother Pick‑up</div>
@@ -23,8 +54,10 @@
     <div><span class="legend-box" style="background:#ffe5e5"></span>Appointment</div>
   </div>
 
-  <div id="calendar"></div>
+  <!-- CALENDAR -->
+  <div id="calendar" style="display:none;"></div>
 
+  <!-- SUMMARY -->
   <div id="summary" style="display:none;">
     <h2>Summary</h2>
     <div id="filters">
