@@ -10,7 +10,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 // Your Firebase config
@@ -37,13 +37,29 @@ const filterCaregiver = document.getElementById("filterCaregiver");
 const filterChild = document.getElementById("filterChild");
 const logoutBtn = document.getElementById("logoutBtn");
 
+// Reference to shared calendar document
+const sharedDocRef = doc(db, "sharedCalendar", "main");
+
+let calendarData = {}; // key => value
+
 // Listen for auth state
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
-    // Load user's calendar data from Firestore and build calendar
     await loadUserData();
     setupButtons();
+
+    // Set up real-time listener for shared calendar data
+    onSnapshot(sharedDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        calendarData = docSnap.data().calendarData || {};
+        buildCalendars();
+        // If summary is visible, update it as well
+        if (document.getElementById("summary").style.display === "block") {
+          buildSummary();
+        }
+      }
+    });
   } else {
     // Not signed in - redirect to login page
     window.location.href = "login.html";
@@ -55,29 +71,20 @@ logoutBtn.onclick = () => {
   signOut(auth);
 };
 
-// Store all data keys for quick save/load
-// We'll save all day keys as a single object in Firestore under doc "users/{uid}/calendarData"
-let calendarData = {}; // key => value
-
+// Load shared calendar data
 async function loadUserData() {
-  // Fetch calendar data doc for this user
-  const docRef = doc(db, "users", currentUser.uid);
-  const docSnap = await getDoc(docRef);
-
+  const docSnap = await getDoc(sharedDocRef);
   if (docSnap.exists()) {
     calendarData = docSnap.data().calendarData || {};
   } else {
     calendarData = {};
   }
-
   buildCalendars();
 }
 
-// Save all calendar data to Firestore
+// Save shared calendar data
 async function saveUserData() {
-  if (!currentUser) return;
-  const docRef = doc(db, "users", currentUser.uid);
-  await setDoc(docRef, { calendarData }, { merge: true });
+  await setDoc(sharedDocRef, { calendarData }, { merge: true });
 }
 
 // Setup buttons and filters
@@ -138,11 +145,6 @@ function buildCalendars() {
       wov.className = "week-overlay";
       wov.textContent = wk % 2 ? "Week 1" : "Week 2";
       cell.appendChild(wov);
-
-      const hd = document.createElement("div");
-      hd.className = "day-header";
-      hd.textContent = `${d} ${days[dow]}`;
-      cell.appendChild(hd);
 
       const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff"),
         pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup"),
@@ -246,50 +248,68 @@ function buildSummary() {
   const months = [6, 7, 8, 9, 10, 11],
     ym = 2025,
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  let rows = [];
 
-  for (let m of months) {
-    const di = new Date(ym, m + 1, 0).getDate();
-    for (let d = 1; d <= di; d++) {
-      const key = `${ym}-${m + 1}-${d}`,
-        date = new Date(ym, m, d);
-      const drop = calendarData[key + "_dropoff"] || "",
-        pick = calendarData[key + "_pickup"] || "",
-        app = calendarData[key + "_appointment"] || "",
-        ivy = calendarData[key + "_ivy"] === true,
-        ever = calendarData[key + "_everly"] === true,
-        com = calendarData[key + "_comment"] || "";
+  months.forEach((m) => {
+    const daysInMonth = new Date(ym, m + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateKey = `${ym}-${m + 1}-${d}`;
+      const dropoff = calendarData[dateKey + "_dropoff"] || "";
+      const pickup = calendarData[dateKey + "_pickup"] || "";
+      const appointment = calendarData[dateKey + "_appointment"] || "";
+      const ivy = calendarData[dateKey + "_ivy"] === true;
+      const ever = calendarData[dateKey + "_everly"] === true;
 
-      if (fc !== "all" && drop !== fc && pick !== fc) continue;
-      if (ch === "ivy" && !ivy) continue;
-      if (ch === "everly" && !ever) continue;
+      // Filter logic
+      if (
+        (fc && fc !== "" && ![dropoff, pickup].includes(fc)) ||
+        (ch && ch !== "" && !((ch === "Ivy" && ivy) || (ch === "Everly" && ever)))
+      )
+        continue;
 
-      const tr = document.createElement("tr");
-      const cg = new Set([drop, pick].filter(Boolean));
-      if (cg.size === 1) tr.className = cg.has("mother") ? "summary-mother-only" : "summary-father-only";
-      if (cg.size === 2) tr.className = "summary-both";
+      if (!(dropoff || pickup || appointment || ivy || ever)) continue;
 
-      tr.innerHTML = `<td>${key}</td><td>${days[date.getDay()]}</td><td>${drop}</td><td>${pick}</td><td>${app}</td><td>${
-        ivy ? "✓" : ""
-      }</td><td>${ever ? "✓" : ""}</td><td>${com}</td>`;
-      summaryBody.appendChild(tr);
+      const dt = new Date(ym, m, d);
+      rows.push({
+        date: dt.toDateString(),
+        day: days[dt.getDay()],
+        dropoff,
+        pickup,
+        appointment,
+        ivy,
+        ever,
+      });
     }
-  }
+  });
+
+  rows.forEach((r) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${r.day}</td>
+      <td class="${r.dropoff ? "summary-" + r.dropoff + "-only" : ""}">${r.dropoff}</td>
+      <td class="${r.pickup ? "summary-" + r.pickup + "-only" : ""}">${r.pickup}</td>
+      <td>${r.appointment}</td>
+      <td>${r.ivy ? "✔️" : ""}</td>
+      <td>${r.ever ? "✔️" : ""}</td>
+    `;
+    summaryBody.appendChild(tr);
+  });
 }
 
-// Export summary as CSV
+// Export CSV from summary table
 function exportCSV() {
-  let csv = `"Date","Day","Drop-off","Pick-up","Appointment","Ivy","Everly","Notes"\n`;
-  for (const tr of summaryBody.querySelectorAll("tr")) {
-    const cells = Array.from(tr.querySelectorAll("td")).map((td) =>
-      `"${td.textContent.replace(/"/g, '""')}"`
-    );
-    csv += cells.join(",") + "\n";
-  }
+  let csv = "Date,Day,Drop-off,Pick-up,Appointment,Ivy,Everly\n";
+  summaryBody.querySelectorAll("tr").forEach((tr) => {
+    const cols = [...tr.children].map((td) => td.textContent.trim());
+    csv += cols.join(",") + "\n";
+  });
+
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "childcare_summary.csv";
+  a.download = "calendar-summary.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
