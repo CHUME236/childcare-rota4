@@ -200,34 +200,22 @@ function buildSummary() {
 
   const grouped = {};
 
-  // Group all entries by date
   for (const key in calendarData) {
+    const [date, field] = key.split("_");
     const val = calendarData[key];
-    if (!val && val !== false) continue;
-
-    const [date, type] = key.split("_");
-    if (!date || !type) continue;
-
+    if (!date || !field) continue;
     if (!grouped[date]) grouped[date] = {};
-    grouped[date][type] = val;
+    grouped[date][field] = val;
   }
 
-  for (const date in grouped) {
-    const day = grouped[date];
-
-    // Filter by caregiver
+  Object.entries(grouped).forEach(([date, day]) => {
     if (
       fc &&
       (!day.dropoff || day.dropoff.toLowerCase() !== fc) &&
       (!day.pickup || day.pickup.toLowerCase() !== fc)
-    ) {
-      continue;
-    }
+    ) return;
 
-    // Filter by child
-    if (ch && !day[ch]) {
-      continue;
-    }
+    if (ch && !day[ch]) return;
 
     const tr = document.createElement("tr");
 
@@ -236,7 +224,7 @@ function buildSummary() {
     tr.appendChild(dateTd);
 
     const infoTd = document.createElement("td");
-    let info = [];
+    const info = [];
 
     if (day.dropoff) info.push(`Drop-off: ${day.dropoff}`);
     if (day.pickup) info.push(`Pick-up: ${day.pickup}`);
@@ -259,7 +247,7 @@ function buildSummary() {
     }
 
     summaryBody.appendChild(tr);
-  }
+  });
 }
 
 function exportCSV() {
