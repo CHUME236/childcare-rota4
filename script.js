@@ -1,19 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
-  buildCalendars();
-});
-
-function showCalendar() {
-  document.getElementById("calendar").style.display = "block";
-  document.getElementById("summary").style.display = "none";
-  document.getElementById("filters").style.display = "none";
-}
-
-function showSummary() {
-  document.getElementById("calendar").style.display = "none";
-  document.getElementById("summary").style.display = "block";
-  document.getElementById("filters").style.display = "flex";
-  renderSummaryTable();
-}
+document.addEventListener("DOMContentLoaded", buildCalendars);
 
 function buildCalendars() {
   const calendar = document.getElementById("calendar");
@@ -27,6 +12,7 @@ function buildCalendars() {
     const title = document.createElement("h2");
     title.textContent = `${months[month - 6]} ${year}`;
     section.appendChild(title);
+
     const monthGrid = document.createElement("div");
     monthGrid.className = "month-grid";
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -44,6 +30,7 @@ function buildCalendars() {
       const date = new Date(year, month, day);
       const dow = (date.getDay() + 6) % 7;
       if (dow === 0 || day === 1) weekCounter++;
+
       const currentDate = `${year}-${month + 1}-${day}`;
       const cell = document.createElement("div");
       cell.className = "day";
@@ -82,44 +69,62 @@ function buildCalendars() {
         <option value="party">Party</option>
         <option value="swimming">Swimming</option>`;
       selectAppointment.value = localStorage.getItem(currentDate + "_appointment") || "";
-      if (selectAppointment.value) {
-        cell.classList.add("has-appointment");
-      }
 
-      const comment = document.createElement("textarea");
-      comment.className = "day-comment";
-      comment.placeholder = "Notes...";
-      comment.value = localStorage.getItem(currentDate + "_comment") || "";
+      const ivyFlag = document.createElement("label");
+      ivyFlag.className = "checkbox-label";
+      const ivyCheckbox = document.createElement("input");
+      ivyCheckbox.type = "checkbox";
+      ivyCheckbox.checked = localStorage.getItem(currentDate + "_ivy") === "true";
+      ivyCheckbox.addEventListener("change", () =>
+        localStorage.setItem(currentDate + "_ivy", ivyCheckbox.checked)
+      );
+      ivyFlag.appendChild(ivyCheckbox);
+      ivyFlag.appendChild(document.createTextNode(" Ivy"));
 
-      const checkboxLabel = document.createElement("label");
-      checkboxLabel.className = "checkbox-label";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = localStorage.getItem(currentDate + "_checkbox") === "true";
-      checkboxLabel.appendChild(checkbox);
-      checkboxLabel.appendChild(document.createTextNode("Completed"));
+      const everlyFlag = document.createElement("label");
+      everlyFlag.className = "checkbox-label";
+      const everlyCheckbox = document.createElement("input");
+      everlyCheckbox.type = "checkbox";
+      everlyCheckbox.checked = localStorage.getItem(currentDate + "_everly") === "true";
+      everlyCheckbox.addEventListener("change", () =>
+        localStorage.setItem(currentDate + "_everly", everlyCheckbox.checked)
+      );
+      everlyFlag.appendChild(everlyCheckbox);
+      everlyFlag.appendChild(document.createTextNode(" Everly"));
 
-      // Save data on change
-      [selectDropoff, selectPickup, selectAppointment, comment, checkbox].forEach(input => {
-        input.addEventListener("change", () => {
-          localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
-          localStorage.setItem(currentDate + "_pickup", selectPickup.value);
-          localStorage.setItem(currentDate + "_appointment", selectAppointment.value);
-          localStorage.setItem(currentDate + "_comment", comment.value);
-          localStorage.setItem(currentDate + "_checkbox", checkbox.checked);
-          updateDayStyles(cell, selectDropoff.value, selectPickup.value, selectAppointment.value);
-        });
+      const commentBox = document.createElement("textarea");
+      commentBox.className = "day-comment";
+      commentBox.placeholder = "Add notes...";
+      commentBox.value = localStorage.getItem(currentDate + "_comment") || "";
+      commentBox.addEventListener("input", () =>
+        localStorage.setItem(currentDate + "_comment", commentBox.value)
+      );
+
+      selectDropoff.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_dropoff", selectDropoff.value);
+        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
       });
 
-      // Initial style update
-      updateDayStyles(cell, selectDropoff.value, selectPickup.value, selectAppointment.value);
+      selectPickup.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_pickup", selectPickup.value);
+        updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+      });
+
+      selectAppointment.addEventListener("change", () => {
+        localStorage.setItem(currentDate + "_appointment", selectAppointment.value);
+        updateAppointmentStyle(cell, selectAppointment.value);
+      });
+
+      updateDayCellStyle(cell, selectDropoff.value, selectPickup.value);
+      updateAppointmentStyle(cell, selectAppointment.value);
 
       cell.appendChild(header);
       cell.appendChild(selectDropoff);
       cell.appendChild(selectPickup);
       cell.appendChild(selectAppointment);
-      cell.appendChild(comment);
-      cell.appendChild(checkboxLabel);
+      cell.appendChild(ivyFlag);
+      cell.appendChild(everlyFlag);
+      cell.appendChild(commentBox);
       monthGrid.appendChild(cell);
     }
 
@@ -128,77 +133,16 @@ function buildCalendars() {
   }
 }
 
-function updateDayStyles(cell, dropoff, pickup, appointment) {
-  cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment");
-  if (dropoff === "mother") cell.classList.add("mother-dropoff");
-  if (dropoff === "father") cell.classList.add("father-dropoff");
-  if (pickup === "mother") cell.classList.add("mother-pickup");
-  if (pickup === "father") cell.classList.add("father-pickup");
-  if (appointment) cell.classList.add("has-appointment");
+function updateDayCellStyle(cell, dropoff, pickup) {
+  cell.className = "day";
+  if (dropoff) cell.classList.add(`${dropoff}-dropoff`);
+  if (pickup) cell.classList.add(`${pickup}-pickup`);
 }
 
-function renderSummaryTable() {
-  const tableBody = document.querySelector("#summary tbody");
-  tableBody.innerHTML = "";
-  const year = 2025;
-
-  const caregiverFilter = document.getElementById("filter-caregiver").value;
-  const childFilter = document.getElementById("filter-child").value;
-
-  for (let month = 6; month <= 11; month++) {
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const currentDate = `${year}-${month + 1}-${day}`;
-      const dropoff = localStorage.getItem(currentDate + "_dropoff") || "";
-      const pickup = localStorage.getItem(currentDate + "_pickup") || "";
-      const appointment = localStorage.getItem(currentDate + "_appointment") || "";
-      const comment = localStorage.getItem(currentDate + "_comment") || "";
-      const checkbox = localStorage.getItem(currentDate + "_checkbox") === "true";
-
-      // Apply filters
-      if (caregiverFilter && ![dropoff, pickup].includes(caregiverFilter)) continue;
-      if (childFilter && !comment.toLowerCase().includes(childFilter.toLowerCase())) continue;
-
-      const row = document.createElement("tr");
-
-      // Row coloring
-      const caregivers = [dropoff, pickup].filter(Boolean);
-      if (caregivers.includes("mother") && caregivers.includes("father")) {
-        row.className = "summary-both";
-      } else if (caregivers.includes("mother")) {
-        row.className = "summary-mother-only";
-      } else if (caregivers.includes("father")) {
-        row.className = "summary-father-only";
-      }
-
-      row.innerHTML = `
-        <td>${currentDate}</td>
-        <td>${dropoff}</td>
-        <td>${pickup}</td>
-        <td>${appointment}</td>
-        <td>${comment}</td>
-        <td>${checkbox ? "✔" : ""}</td>
-      `;
-      tableBody.appendChild(row);
-    }
+function updateAppointmentStyle(cell, appointment) {
+  if (appointment) {
+    cell.classList.add("has-appointment");
+  } else {
+    cell.classList.remove("has-appointment");
   }
-}
-
-document.getElementById("export-btn").addEventListener("click", exportSummaryToCSV);
-
-function exportSummaryToCSV() {
-  let csv = "Date,Drop-off,Pick-up,Appointment,Notes,Completed\n";
-  document.querySelectorAll("#summary tbody tr").forEach(row => {
-    const cols = Array.from(row.querySelectorAll("td")).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
-    csv += cols.join(",") + "\n";
-  });
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "childcare_summary.csv";
-  a.click();
-  URL.revokeObjectURL(url);
 }
