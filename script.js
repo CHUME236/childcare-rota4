@@ -10,7 +10,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 // Your Firebase config
@@ -41,7 +40,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
-    // Load shared calendar data from Firestore and build calendar
+    console.log(`Logged in as ${user.email}`);
     await loadUserData();
     setupButtons();
   } else {
@@ -55,29 +54,39 @@ logoutBtn.onclick = () => {
   signOut(auth);
 };
 
-// Store all data keys for quick save/load
-// Shared calendar data stored in Firestore doc "sharedCalendar/main"
-let calendarData = {}; // key => value
+let calendarData = {}; // Shared calendar data object
 
+// Load shared calendar data from Firestore
 async function loadUserData() {
-  // Fetch shared calendar data doc
-  const docRef = doc(db, "sharedCalendar", "main");
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    calendarData = docSnap.data().calendarData || {};
-  } else {
-    calendarData = {};
+  try {
+    const docRef = doc(db, "sharedCalendar", "main");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      calendarData = docSnap.data().calendarData || {};
+      console.log("Loaded calendar data:", calendarData);
+    } else {
+      calendarData = {};
+      console.log("No calendar data found, starting fresh.");
+    }
+    buildCalendars();
+  } catch (error) {
+    console.error("Error loading calendar data:", error);
   }
-
-  buildCalendars();
 }
 
-// Save all calendar data to Firestore shared document
+// Save shared calendar data to Firestore
 async function saveUserData() {
-  if (!currentUser) return;
-  const docRef = doc(db, "sharedCalendar", "main");
-  await setDoc(docRef, { calendarData }, { merge: true });
+  try {
+    if (!calendarData) {
+      console.warn("No calendar data to save.");
+      return;
+    }
+    const docRef = doc(db, "sharedCalendar", "main");
+    await setDoc(docRef, { calendarData });
+    console.log("Saved calendar data successfully.");
+  } catch (error) {
+    console.error("Error saving calendar data:", error);
+  }
 }
 
 // Setup buttons and filters
@@ -139,23 +148,17 @@ function buildCalendars() {
       wov.textContent = wk % 2 ? "Week 1" : "Week 2";
       cell.appendChild(wov);
 
-      const hd = document.createElement("div");
-      hd.className = "day-header";
-      hd.textContent = `${d} ${days[dow]}`;
-      cell.appendChild(hd);
-
       const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff"),
         pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup"),
         app = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", key + "_appointment");
 
-      [drop, pick].forEach(
-        (sel) =>
-          (sel.onchange = async () => {
-            calendarData[sel._key] = sel.value;
-            await saveUserData();
-            updateDay(cell);
-          })
-      );
+      [drop, pick].forEach((sel) => {
+        sel.onchange = async () => {
+          calendarData[sel._key] = sel.value;
+          await saveUserData();
+          updateDay(cell);
+        };
+      });
       app.onchange = async () => {
         calendarData[app._key] = app.value;
         await saveUserData();
@@ -243,65 +246,46 @@ function buildSummary() {
   summaryBody.innerHTML = "";
   const fc = filterCaregiver.value,
     ch = filterChild.value;
-  const months = [6, 7, 8, 9, 10, 11];
-  const year = 2025;
+  for (const key in calendarData) {
+    if (!key.includes("_dropoff") && !key.includes("_pickup") && !key.includes("_appointment")) continue;
+    const date = key.split("_")[0];
+    const type = key.split("_")[1];
+    const val = calendarData[key];
+    if (!val) continue;
+    // Filtering logic can be added here as needed
 
-  months.forEach((m) => {
-    const daysIn = new Date(year, m + 1, 0).getDate();
-    for (let d = 1; d <= daysIn; d++) {
-      const key = `${year}-${m + 1}-${d}`;
-      const dropoff = calendarData[key + "_dropoff"];
-      const pickup = calendarData[key + "_pickup"];
-      const appointment = calendarData[key + "_appointment"];
-      const ivy = calendarData[key + "_ivy"];
-      const everly = calendarData[key + "_everly"];
+    const tr = document.createElement("tr");
+    const dateTd = document.createElement("td");
+    dateTd.textContent = date;
+    tr.appendChild(dateTd);
 
-      if (
-        (fc === "" || fc === dropoff || fc === pickup) &&
-        (ch === "" || (ch === "ivy" && ivy) || (ch === "everly" && everly))
-      ) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${key}</td>
-          <td>${dropoff || ""}</td>
-          <td>${pickup || ""}</td>
-          <td>${appointment || ""}</td>
-          <td>${ivy ? "Yes" : ""}</td>
-          <td>${everly ? "Yes" : ""}</td>
-          <td>${calendarData[key + "_comment"] || ""}</td>`;
-        summaryBody.appendChild(tr);
-      }
-    }
-  });
+    const typeTd = document.createElement("td");
+    typeTd.textContent = type;
+    tr.appendChild(typeTd);
+
+    const valTd = document.createElement("td");
+    valTd.textContent = val;
+    tr.appendChild(valTd);
+
+    summaryBody.appendChild(tr);
+  }
 }
 
-// Export CSV
+// Export CSV (example implementation)
 function exportCSV() {
-  let csv = "Date,Dropoff,Pickup,Appointment,Ivy,Everly,Comments\n";
-  const months = [6, 7, 8, 9, 10, 11];
-  const year = 2025;
-
-  months.forEach((m) => {
-    const daysIn = new Date(year, m + 1, 0).getDate();
-    for (let d = 1; d <= daysIn; d++) {
-      const key = `${year}-${m + 1}-${d}`;
-      csv +=
-        `"${key}",` +
-        `"${calendarData[key + "_dropoff"] || ""}",` +
-        `"${calendarData[key + "_pickup"] || ""}",` +
-        `"${calendarData[key + "_appointment"] || ""}",` +
-        `"${calendarData[key + "_ivy"] ? "Yes" : ""}",` +
-        `"${calendarData[key + "_everly"] ? "Yes" : ""}",` +
-        `"${(calendarData[key + "_comment"] || "").replace(/"/g, '""')}"\n`;
-    }
-  });
-
+  let csv = "Date,Type,Value\n";
+  for (const key in calendarData) {
+    if (!calendarData[key]) continue;
+    const date = key.split("_")[0];
+    const type = key.split("_")[1] || "";
+    const val = calendarData[key];
+    csv += `"${date}","${type}","${val}"\n`;
+  }
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar_summary.csv";
-  document.body.appendChild(a);
+  a.download = "calendar.csv";
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
