@@ -1,4 +1,5 @@
-// script.js
+// Full updated JS including all necessary fixes to make the summary section work correctly
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
   getAuth,
@@ -12,7 +13,6 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBekbb2wy8cO1zJ9lTj7eC64sOZBYa-4PM",
   authDomain: "childcare-rota-4.firebaseapp.com",
@@ -22,74 +22,46 @@ const firebaseConfig = {
   appId: "1:703216575309:web:c69096afd83ce1bce40d04",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
+let calendarData = {};
 
-// Elements
 const calendarEl = document.getElementById("calendar");
 const summaryBody = document.getElementById("summaryBody");
 const filterCaregiver = document.getElementById("filterCaregiver");
 const filterChild = document.getElementById("filterChild");
 const logoutBtn = document.getElementById("logoutBtn");
 
-// Listen for auth state
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
-    console.log(`Logged in as ${user.email}`);
     await loadUserData();
     setupButtons();
   } else {
-    // Not signed in - redirect to login page
     window.location.href = "login.html";
   }
 });
 
-// Logout button
-logoutBtn.onclick = () => {
-  signOut(auth);
-};
+logoutBtn.onclick = () => signOut(auth);
 
-let calendarData = {}; // Shared calendar data object
-
-// Load shared calendar data from Firestore
 async function loadUserData() {
-  try {
-    const docRef = doc(db, "sharedCalendar", "main");
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      calendarData = docSnap.data().calendarData || {};
-      console.log("Loaded calendar data:", calendarData);
-    } else {
-      calendarData = {};
-      console.log("No calendar data found, starting fresh.");
-    }
-    buildCalendars();
-  } catch (error) {
-    console.error("Error loading calendar data:", error);
+  const docRef = doc(db, "sharedCalendar", "main");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    calendarData = docSnap.data().calendarData || {};
+  } else {
+    calendarData = {};
   }
+  buildCalendars();
 }
 
-// Save shared calendar data to Firestore
 async function saveUserData() {
-  try {
-    if (!calendarData) {
-      console.warn("No calendar data to save.");
-      return;
-    }
-    const docRef = doc(db, "sharedCalendar", "main");
-    await setDoc(docRef, { calendarData });
-    console.log("Saved calendar data successfully.");
-  } catch (error) {
-    console.error("Error saving calendar data:", error);
-  }
+  await setDoc(doc(db, "sharedCalendar", "main"), { calendarData });
 }
 
-// Setup buttons and filters
 function setupButtons() {
   document.getElementById("showCalendarBtn").onclick = () => toggle("calendar");
   document.getElementById("showSummaryBtn").onclick = () => {
@@ -101,21 +73,15 @@ function setupButtons() {
   filterChild.onchange = buildSummary;
 }
 
-// Show/hide calendar or summary
 function toggle(id) {
   document.getElementById("calendar").style.display = id === "calendar" ? "flex" : "none";
   document.getElementById("summary").style.display = id === "summary" ? "block" : "none";
 }
 
-// Helper function to pad numbers with leading zeros
-const pad = (n) => (n < 10 ? "0" + n : n);
-
-// Build calendar UI
 function buildCalendars() {
   calendarEl.innerHTML = "";
-  const year = 2025,
-    labels = ["July", "August", "September", "October", "November", "December"],
-    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const year = 2025;
+  const labels = ["July", "August", "September", "October", "November", "December"];
 
   for (let m = 6; m <= 11; m++) {
     const sec = document.createElement("section");
@@ -126,9 +92,9 @@ function buildCalendars() {
     const grid = document.createElement("div");
     grid.className = "month-grid";
 
-    const first = new Date(year, m, 1).getDay(),
-      daysIn = new Date(year, m + 1, 0).getDate(),
-      offset = (first + 6) % 7;
+    const first = new Date(year, m, 1).getDay();
+    const daysIn = new Date(year, m + 1, 0).getDate();
+    const offset = (first + 6) % 7;
 
     for (let i = 0; i < offset; i++) {
       let e = document.createElement("div");
@@ -138,13 +104,15 @@ function buildCalendars() {
 
     let wk = 0;
     for (let d = 1; d <= daysIn; d++) {
-      const dateObj = new Date(year, m, d),
-        dow = (dateObj.getDay() + 6) % 7;
+      const dateObj = new Date(year, m, d);
+      const dow = (dateObj.getDay() + 6) % 7;
       if (dow === 0 || d === 1) wk++;
 
-      // Use zero-padded month and day
-      const key = `${year}-${pad(m + 1)}-${pad(d)}`,
-        cell = document.createElement("div");
+      const month = String(m + 1).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      const key = `${year}-${month}-${day}`;
+
+      const cell = document.createElement("div");
       cell.className = "day";
 
       const wov = document.createElement("div");
@@ -152,27 +120,22 @@ function buildCalendars() {
       wov.textContent = wk % 2 ? "Week 1" : "Week 2";
       cell.appendChild(wov);
 
-      const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff"),
-        pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup"),
-        app = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", key + "_appointment");
+      const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff");
+      const pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup");
+      const app = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", key + "_appointment");
 
-      [drop, pick].forEach((sel) => {
+      [drop, pick, app].forEach(sel => {
         sel.onchange = async () => {
           calendarData[sel._key] = sel.value;
           await saveUserData();
           updateDay(cell);
         };
       });
-      app.onchange = async () => {
-        calendarData[app._key] = app.value;
-        await saveUserData();
-        updateDay(cell);
-      };
 
-      const ivy = createCheckbox("Ivy", key + "_ivy"),
-        ever = createCheckbox("Everly", key + "_everly");
+      const ivy = createCheckbox("Ivy", key + "_ivy");
+      const ever = createCheckbox("Everly", key + "_everly");
 
-      [ivy, ever].forEach((ch) => {
+      [ivy, ever].forEach(ch => {
         ch.querySelector("input").onchange = async (e) => {
           calendarData[ch._key] = e.target.checked;
           await saveUserData();
@@ -188,9 +151,8 @@ function buildCalendars() {
         await saveUserData();
       };
 
-      [drop, pick, app, ivy, ever, txt].forEach((el) => cell.appendChild(el));
+      [drop, pick, app, ivy, ever, txt].forEach(el => cell.appendChild(el));
 
-      // Set initial values from calendarData
       drop.value = calendarData[key + "_dropoff"] || "";
       pick.value = calendarData[key + "_pickup"] || "";
       app.value = calendarData[key + "_appointment"] || "";
@@ -200,6 +162,7 @@ function buildCalendars() {
       updateDay(cell);
       grid.appendChild(cell);
     }
+
     sec.appendChild(grid);
     calendarEl.appendChild(sec);
   }
@@ -208,10 +171,8 @@ function buildCalendars() {
 function createSelect(opts, def, key) {
   const s = document.createElement("select");
   s._key = key;
-  s.innerHTML = opts
-    .map((o) => `<option${o == "" ? " selected" : ""} value="${o}">${o || def}</option>`)
-    .join("");
-  s.className = oClass(def);
+  s.className = def.includes("Drop") ? "select-caregiver" : "select-appointment";
+  s.innerHTML = opts.map(o => `<option value="${o}"${o === "" ? " selected" : ""}>${o || def}</option>`).join("");
   return s;
 }
 
@@ -221,166 +182,74 @@ function createCheckbox(label, key) {
   l._key = key;
   const c = document.createElement("input");
   c.type = "checkbox";
-  c.checked = calendarData[key] === true;
   l.appendChild(c);
   l.appendChild(document.createTextNode(" " + label));
   return l;
 }
 
-function oClass(str) {
-  return str.includes("Drop") ? "select-caregiver" : "select-appointment";
-}
-
 function updateDay(cell) {
-  ["mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup"].forEach((c) =>
-    cell.classList.remove(c)
-  );
-  const sel = cell.querySelectorAll("select");
-  const d = sel[0].value,
-    p = sel[1].value;
-  if (d) cell.classList.add(d + "-dropoff");
-  if (p) cell.classList.add(p + "-pickup");
+  ["mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment"].forEach(c => cell.classList.remove(c));
+  const [drop, pick, app] = cell.querySelectorAll("select");
+  if (drop.value) cell.classList.add(`${drop.value}-dropoff`);
+  if (pick.value) cell.classList.add(`${pick.value}-pickup`);
+  if (app.value) cell.classList.add("has-appointment");
 }
 
-// Build summary table with filtering and date padding
 function buildSummary() {
-  console.log("Building summary...");
   summaryBody.innerHTML = "";
+  const fc = filterCaregiver.value.toLowerCase();
+  const ch = filterChild.value.toLowerCase();
 
-  const fcRaw = filterCaregiver.value;
-  const chRaw = filterChild.value;
-  const fc = fcRaw ? fcRaw.toLowerCase() : "";
-  const ch = chRaw ? chRaw.toLowerCase() : "";
-
-  console.log(`Filters - Caregiver: "${fc}", Child: "${ch}"`);
-
-  for (const key in calendarData) {
+  const seenDates = new Set();
+  Object.keys(calendarData).forEach((key) => {
     const val = calendarData[key];
-    if (val === null || val === undefined) continue;
+    if (!val && val !== false) return;
+    const [date, type] = key.split("_");
+    if (!date || !type) return;
 
-    const parts = key.split("_");
-    if (parts.length !== 2) continue;
+    const matchedCaregiver = ["dropoff", "pickup"].includes(type) && (!fc || val.toLowerCase() === fc);
+    const matchedChild = ["ivy", "everly"].includes(type) && (!ch || ch === type);
+    const matchedOther = ["appointment", "comment"].includes(type);
 
-    const [dateRaw, type] = parts;
-    if (!["dropoff", "pickup", "appointment", "ivy", "everly", "comment"].includes(type)) continue;
+    if (!(matchedCaregiver || matchedChild || matchedOther)) return;
 
-    // Zero pad date parts for consistent display
-    const [year, monthRaw, dayRaw] = dateRaw.split("-");
-    const month = pad(Number(monthRaw));
-    const day = pad(Number(dayRaw));
-    const date = `${year}-${month}-${day}`;
-
-    // Apply caregiver filter if set
-    if (fc) {
-      if (type === "dropoff" || type === "pickup") {
-        if (String(val).toLowerCase() !== fc) continue;
-      }
-    }
-
-    // Apply child filter if set
-    if (ch) {
-      if ((type === "ivy" && ch !== "ivy") || (type === "everly" && ch !== "everly")) {
-        continue;
-      }
-    }
-
-    // Create table row
     const tr = document.createElement("tr");
-
-    // Date cell
     const dateTd = document.createElement("td");
     dateTd.textContent = date;
     tr.appendChild(dateTd);
 
-    // Type cell
     const typeTd = document.createElement("td");
-    let displayType = "";
-    switch (type) {
-      case "dropoff":
-        displayType = "Drop-off";
-        break;
-      case "pickup":
-        displayType = "Pick-up";
-        break;
-      case "appointment":
-        displayType = "Appointment";
-        break;
-      case "ivy":
-        displayType = "Ivy";
-        break;
-      case "everly":
-        displayType = "Everly";
-        break;
-      case "comment":
-        displayType = "Comment";
-        break;
-      default:
-        displayType = type;
-    }
-    typeTd.textContent = displayType;
+    const map = { dropoff: "Drop-off", pickup: "Pick-up", appointment: "Appointment", ivy: "Ivy", everly: "Everly", comment: "Comment" };
+    typeTd.textContent = map[type] || type;
     tr.appendChild(typeTd);
 
-    // Value cell
     const valTd = document.createElement("td");
-    if ((type === "ivy" || type === "everly") && val === true) {
-      valTd.textContent = "Yes";
-    } else if (type === "comment") {
-      valTd.textContent = val || "";
-    } else {
-      valTd.textContent = val;
-    }
+    valTd.textContent = typeof val === "boolean" ? (val ? "Yes" : "No") : val;
     tr.appendChild(valTd);
 
-    // Add classes for styling
-    if (type === "dropoff" || type === "pickup") {
-      if (String(val).toLowerCase() === "mother") tr.classList.add("summary-mother-only");
-      else if (String(val).toLowerCase() === "father") tr.classList.add("summary-father-only");
-    } else if (type === "ivy" || type === "everly") {
+    if (["dropoff", "pickup"].includes(type)) {
+      tr.classList.add(val === "mother" ? "summary-mother-only" : "summary-father-only");
+    } else if (["ivy", "everly"].includes(type)) {
       tr.classList.add("summary-child");
     }
 
     summaryBody.appendChild(tr);
-    console.log(`Added summary row: ${date} - ${type} - ${val}`);
-  }
+  });
 }
 
-// Export summary to CSV
 function exportCSV() {
   let csv = "Date,Type,Value\n";
   for (const key in calendarData) {
     const val = calendarData[key];
-    if (!val) continue;
-
-    const parts = key.split("_");
-    if (parts.length !== 2) continue;
-
-    const [dateRaw, type] = parts;
-    if (!["dropoff", "pickup", "appointment", "ivy", "everly", "comment"].includes(type)) continue;
-
-    const [year, monthRaw, dayRaw] = dateRaw.split("-");
-    const month = pad(Number(monthRaw));
-    const day = pad(Number(dayRaw));
-    const date = `${year}-${month}-${day}`;
-
-    const displayType = {
-      dropoff: "Drop-off",
-      pickup: "Pick-up",
-      appointment: "Appointment",
-      ivy: "Ivy",
-      everly: "Everly",
-      comment: "Comment",
-    }[type] || type;
-
-    let value = val;
-    if ((type === "ivy" || type === "everly") && val === true) value = "Yes";
-
-    csv += `"${date}","${displayType}","${value}"\n`;
+    if (!val && val !== false) continue;
+    const [date, type] = key.split("_");
+    csv += `${date},${type},${val}\n`;
   }
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar_summary.csv";
+  a.download = "calendar.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
