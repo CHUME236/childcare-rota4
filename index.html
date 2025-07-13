@@ -9,59 +9,63 @@
 <body>
   <h1>Childcare Rota (July–December 2025)</h1>
 
-  <!-- Authentication UI -->
   <div id="authContainer">
-    <h2>Login / Sign Up</h2>
-    <input type="email" id="emailInput" placeholder="Email" />
-    <input type="password" id="passwordInput" placeholder="Password" />
-    <button id="signUpBtn">Sign Up</button>
-    <button id="loginBtn">Login</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-    <div id="authMessage">Please log in or sign up.</div>
+    <h2>Please Log In or Sign Up</h2>
+    <input id="emailInput" type="email" placeholder="Email" />
+    <input id="passwordInput" type="password" placeholder="Password" />
+    <button id="signupBtn">Sign Up</button>
+    <button id="loginBtn">Log In</button>
+    <div id="authError" style="color:red;margin-top:10px;"></div>
   </div>
 
-  <div class="button-container" style="display:none;" id="appButtons">
-    <button id="showCalendarBtn">Show Calendar</button>
-    <button id="showSummaryBtn">Show Summary</button>
-    <button id="exportCsvBtn">Export Summary to CSV</button>
-  </div>
-
-  <div class="legend" style="display:none;" id="legendContainer">
-    <div><span class="legend-box" style="border-top:15px solid #FFC0CB"></span>Mother Drop‑off</div>
-    <div><span class="legend-box" style="border-top:15px solid #0096FF"></span>Father Drop‑off</div>
-    <div><span class="legend-box" style="border-bottom:10px solid #ffff66"></span>Mother Pick‑up</div>
-    <div><span class="legend-box" style="border-bottom:10px solid #66ff66"></span>Father Pick‑up</div>
-    <div><span class="legend-box" style="background:#ffe5e5"></span>Appointment</div>
-  </div>
-
-  <div id="calendar" style="display:none;"></div>
-
-  <div id="summary" style="display:none;">
-    <h2>Summary</h2>
-    <div id="filters">
-      <label for="filterCaregiver">Caregiver:</label>
-      <select id="filterCaregiver">
-        <option value="all">All</option>
-        <option value="mother">Mother</option>
-        <option value="father">Father</option>
-      </select>
-      <label for="filterChild">Child:</label>
-      <select id="filterChild">
-        <option value="all">All</option>
-        <option value="ivy">Ivy</option>
-        <option value="everly">Everly</option>
-      </select>
+  <div id="appContainer" style="display:none;">
+    <div class="button-container">
+      <button id="logoutBtn">Log Out</button>
+      <button id="showCalendarBtn">Show Calendar</button>
+      <button id="showSummaryBtn">Show Summary</button>
+      <button id="exportCsvBtn">Export Summary to CSV</button>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th><th>Day</th><th>Drop-off</th><th>Pick-up</th><th>Appointment</th><th>Ivy</th><th>Everly</th><th>Notes</th>
-        </tr>
-      </thead>
-      <tbody id="summaryBody"></tbody>
-    </table>
+
+    <div class="legend">
+      <div><span class="legend-box" style="border-top:15px solid #FFC0CB"></span>Mother Drop‑off</div>
+      <div><span class="legend-box" style="border-top:15px solid #0096FF"></span>Father Drop‑off</div>
+      <div><span class="legend-box" style="border-bottom:10px solid #ffff66"></span>Mother Pick‑up</div>
+      <div><span class="legend-box" style="border-bottom:10px solid #66ff66"></span>Father Pick‑up</div>
+      <div><span class="legend-box" style="background:#ffe5e5"></span>Appointment</div>
+    </div>
+
+    <div id="calendar"></div>
+
+    <div id="summary" style="display:none;">
+      <h2>Summary</h2>
+      <div id="filters">
+        <label for="filterCaregiver">Caregiver:</label>
+        <select id="filterCaregiver">
+          <option value="all">All</option>
+          <option value="mother">Mother</option>
+          <option value="father">Father</option>
+        </select>
+        <label for="filterChild">Child:</label>
+        <select id="filterChild">
+          <option value="all">All</option>
+          <option value="ivy">Ivy</option>
+          <option value="everly">Everly</option>
+        </select>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Day</th><th>Drop-off</th><th>Pick-up</th><th>Appointment</th><th>Ivy</th><th>Everly</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <script type="module" src="script.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
