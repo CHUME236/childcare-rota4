@@ -10,7 +10,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  onSnapshot,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 // Your Firebase config
@@ -37,29 +37,13 @@ const filterCaregiver = document.getElementById("filterCaregiver");
 const filterChild = document.getElementById("filterChild");
 const logoutBtn = document.getElementById("logoutBtn");
 
-// Reference to shared calendar document
-const sharedDocRef = doc(db, "sharedCalendar", "main");
-
-let calendarData = {}; // key => value
-
 // Listen for auth state
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
+    // Load shared calendar data from Firestore and build calendar
     await loadUserData();
     setupButtons();
-
-    // Set up real-time listener for shared calendar data
-    onSnapshot(sharedDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        calendarData = docSnap.data().calendarData || {};
-        buildCalendars();
-        // If summary is visible, update it as well
-        if (document.getElementById("summary").style.display === "block") {
-          buildSummary();
-        }
-      }
-    });
   } else {
     // Not signed in - redirect to login page
     window.location.href = "login.html";
@@ -71,20 +55,29 @@ logoutBtn.onclick = () => {
   signOut(auth);
 };
 
-// Load shared calendar data
+// Store all data keys for quick save/load
+// Shared calendar data stored in Firestore doc "sharedCalendar/main"
+let calendarData = {}; // key => value
+
 async function loadUserData() {
-  const docSnap = await getDoc(sharedDocRef);
+  // Fetch shared calendar data doc
+  const docRef = doc(db, "sharedCalendar", "main");
+  const docSnap = await getDoc(docRef);
+
   if (docSnap.exists()) {
     calendarData = docSnap.data().calendarData || {};
   } else {
     calendarData = {};
   }
+
   buildCalendars();
 }
 
-// Save shared calendar data
+// Save all calendar data to Firestore shared document
 async function saveUserData() {
-  await setDoc(sharedDocRef, { calendarData }, { merge: true });
+  if (!currentUser) return;
+  const docRef = doc(db, "sharedCalendar", "main");
+  await setDoc(docRef, { calendarData }, { merge: true });
 }
 
 // Setup buttons and filters
@@ -145,6 +138,11 @@ function buildCalendars() {
       wov.className = "week-overlay";
       wov.textContent = wk % 2 ? "Week 1" : "Week 2";
       cell.appendChild(wov);
+
+      const hd = document.createElement("div");
+      hd.className = "day-header";
+      hd.textContent = `${d} ${days[dow]}`;
+      cell.appendChild(hd);
 
       const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff"),
         pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup"),
@@ -245,71 +243,65 @@ function buildSummary() {
   summaryBody.innerHTML = "";
   const fc = filterCaregiver.value,
     ch = filterChild.value;
-  const months = [6, 7, 8, 9, 10, 11],
-    ym = 2025,
-    days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  let rows = [];
+  const months = [6, 7, 8, 9, 10, 11];
+  const year = 2025;
 
   months.forEach((m) => {
-    const daysInMonth = new Date(ym, m + 1, 0).getDate();
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateKey = `${ym}-${m + 1}-${d}`;
-      const dropoff = calendarData[dateKey + "_dropoff"] || "";
-      const pickup = calendarData[dateKey + "_pickup"] || "";
-      const appointment = calendarData[dateKey + "_appointment"] || "";
-      const ivy = calendarData[dateKey + "_ivy"] === true;
-      const ever = calendarData[dateKey + "_everly"] === true;
+    const daysIn = new Date(year, m + 1, 0).getDate();
+    for (let d = 1; d <= daysIn; d++) {
+      const key = `${year}-${m + 1}-${d}`;
+      const dropoff = calendarData[key + "_dropoff"];
+      const pickup = calendarData[key + "_pickup"];
+      const appointment = calendarData[key + "_appointment"];
+      const ivy = calendarData[key + "_ivy"];
+      const everly = calendarData[key + "_everly"];
 
-      // Filter logic
       if (
-        (fc && fc !== "" && ![dropoff, pickup].includes(fc)) ||
-        (ch && ch !== "" && !((ch === "Ivy" && ivy) || (ch === "Everly" && ever)))
-      )
-        continue;
-
-      if (!(dropoff || pickup || appointment || ivy || ever)) continue;
-
-      const dt = new Date(ym, m, d);
-      rows.push({
-        date: dt.toDateString(),
-        day: days[dt.getDay()],
-        dropoff,
-        pickup,
-        appointment,
-        ivy,
-        ever,
-      });
+        (fc === "" || fc === dropoff || fc === pickup) &&
+        (ch === "" || (ch === "ivy" && ivy) || (ch === "everly" && everly))
+      ) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${key}</td>
+          <td>${dropoff || ""}</td>
+          <td>${pickup || ""}</td>
+          <td>${appointment || ""}</td>
+          <td>${ivy ? "Yes" : ""}</td>
+          <td>${everly ? "Yes" : ""}</td>
+          <td>${calendarData[key + "_comment"] || ""}</td>`;
+        summaryBody.appendChild(tr);
+      }
     }
-  });
-
-  rows.forEach((r) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.date}</td>
-      <td>${r.day}</td>
-      <td class="${r.dropoff ? "summary-" + r.dropoff + "-only" : ""}">${r.dropoff}</td>
-      <td class="${r.pickup ? "summary-" + r.pickup + "-only" : ""}">${r.pickup}</td>
-      <td>${r.appointment}</td>
-      <td>${r.ivy ? "✔️" : ""}</td>
-      <td>${r.ever ? "✔️" : ""}</td>
-    `;
-    summaryBody.appendChild(tr);
   });
 }
 
-// Export CSV from summary table
+// Export CSV
 function exportCSV() {
-  let csv = "Date,Day,Drop-off,Pick-up,Appointment,Ivy,Everly\n";
-  summaryBody.querySelectorAll("tr").forEach((tr) => {
-    const cols = [...tr.children].map((td) => td.textContent.trim());
-    csv += cols.join(",") + "\n";
+  let csv = "Date,Dropoff,Pickup,Appointment,Ivy,Everly,Comments\n";
+  const months = [6, 7, 8, 9, 10, 11];
+  const year = 2025;
+
+  months.forEach((m) => {
+    const daysIn = new Date(year, m + 1, 0).getDate();
+    for (let d = 1; d <= daysIn; d++) {
+      const key = `${year}-${m + 1}-${d}`;
+      csv +=
+        `"${key}",` +
+        `"${calendarData[key + "_dropoff"] || ""}",` +
+        `"${calendarData[key + "_pickup"] || ""}",` +
+        `"${calendarData[key + "_appointment"] || ""}",` +
+        `"${calendarData[key + "_ivy"] ? "Yes" : ""}",` +
+        `"${calendarData[key + "_everly"] ? "Yes" : ""}",` +
+        `"${(calendarData[key + "_comment"] || "").replace(/"/g, '""')}"\n`;
+    }
   });
 
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar-summary.csv";
+  a.download = "calendar_summary.csv";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
