@@ -1,149 +1,261 @@
-/* calendar styles */
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+/* === Original Styles === */
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f5f5f5;
 }
-
-.day {
+h1, h2 {
+  text-align: center;
+}
+.button-container {
+  text-align: center;
+  margin: 20px;
+}
+.button-container button {
+  margin: 0 5px;
+  padding: 8px 16px;
+  font-size: 1em;
+  cursor: pointer;
+}
+.legend {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 10px;
+  background: #fff;
   border: 1px solid #ccc;
-  padding: 6px;
-  position: relative;
-  min-height: 100px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.legend-box {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+#calendar {
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  transition: background 0.3s ease;
+  gap: 40px;
 }
-
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.day {
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ccc;
+  min-height: 160px;
+  position: relative;
+  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.day:hover {
+  background: #f0f8ff;
+}
 .day.empty {
   background-color: #f9f9f9;
   border: none;
 }
-
-.day:hover {
-  background-color: #f0f8ff;
+.day-header {
+  font-weight: bold;
+  margin-bottom: 5px;
 }
-
+.select-caregiver, .select-appointment {
+  width: 100%;
+  margin: 4px 0 8px 0;
+  padding: 6px;
+  font-size: 0.95em;
+}
+.mother-dropoff {
+  background-color: #ffc0cb; /* light pink */
+  border-top: 15px solid #FFC0CB;
+}
+.father-dropoff {
+  background-color: #add8e6; /* light blue */
+  border-top: 15px solid #0096FF;
+}
+.mother-pickup {
+  border-bottom: 10px solid #ffff66;
+}
+.father-pickup {
+  border-bottom: 10px solid #66ff66;
+}
+.has-appointment {
+  background: #ffe5e5 !important;
+  border-top: 3px solid #d32f2f;
+}
 .week-overlay {
   position: absolute;
   top: 4px;
   right: 4px;
-  font-size: 10px;
-  color: #888;
+  background: #222;
+  color: #fff;
+  font-size: 0.75em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.9;
+  user-select: none;
 }
-
-.select-caregiver {
-  margin-bottom: 4px;
+.day-comment {
   width: 100%;
+  margin-top: 6px;
+  padding: 6px;
+  resize: vertical;
+  min-height: 40px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+  flex-grow: 1;
 }
-
-.select-appointment {
-  margin-bottom: 4px;
-  width: 100%;
-}
-
 .checkbox-label {
-  font-size: 12px;
-  margin-bottom: 2px;
-  display: block;
+  font-size: 0.9em;
+  margin: 4px 8px 4px 0;
+  display: inline-flex;
+  align-items: center;
 }
-
 .checkbox-label input {
   margin-right: 4px;
 }
 
-.day-comment {
-  flex-grow: 1;
-  resize: vertical;
-  font-size: 12px;
-  margin-top: 6px;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px;
-}
-
-/* Coloring for caregiver classes */
-.mother-dropoff {
-  background-color: #e0f7fa;
-  border-top: 15px solid #00bcd4;
-}
-.father-dropoff {
-  background-color: #ffe0b2;
-  border-top: 15px solid #ff9800;
-}
-.mother-pickup {
-  border-left: 4px solid #00796b;
-  border-bottom: 10px solid #4caf50;
-}
-.father-pickup {
-  border-left: 4px solid #ef6c00;
-  border-bottom: 10px solid #ffeb3b;
-}
-.has-appointment {
-  border-top: 2px solid #d32f2f;
-  background-color: #ffe5e5 !important;
-}
-
-/* Summary table styles */
+/* Summary styles */
 #summary {
-  display: none;
-  margin-top: 20px;
   max-width: 1000px;
+  margin: 20px auto;
   background: #fff;
   padding: 20px;
   border: 1px solid #ccc;
+  display: none; /* hide by default */
 }
-
 #summary table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 0.95em;
 }
-
-#summary th,
-#summary td {
+#summary th, #summary td {
   border: 1px solid #ccc;
   padding: 6px 8px;
-  text-align: left;
+  text-align: center;
 }
-
-/* Row coloring in summary */
+thead {
+  background: #eee;
+}
 .summary-mother-only {
-  background-color: #e0f7fa;
+  background: #fffacd;
 }
-
 .summary-father-only {
-  background-color: #ffe0b2;
+  background: #add8e6;
+}
+.summary-both {
+  background: #ffc0cb;
 }
 
-.summary-child {
-  background-color: #f3e5f5;
+/* Filters */
+#filters {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 15px;
 }
-
-/* Filter dropdowns */
+#filters label {
+  font-weight: bold;
+}
 #filterCaregiver,
 #filterChild {
   margin: 0 8px 12px 0;
   font-size: 14px;
   padding: 4px;
-  min-width: 120px;
+}
+
+/* === New Styles for Login Page === */
+.login-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 20px 30px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.login-container form {
+  display: flex;
+  flex-direction: column;
+}
+.login-container label {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.login-container input[type="email"],
+.login-container input[type="password"] {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+}
+.login-container input[type="email"]:focus,
+.login-container input[type="password"]:focus {
+  outline: none;
+  border-color: #0096FF;
+}
+.login-container button {
+  padding: 12px;
+  background: #0096FF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.3s ease;
+}
+.login-container button:hover {
+  background: #007acc;
+}
+.login-container .toggle-auth {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9em;
+  cursor: pointer;
+  color: #0096FF;
+  user-select: none;
+}
+.login-container .toggle-auth:hover {
+  text-decoration: underline;
+}
+.login-container .error-message {
+  color: #d9534f;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 600;
+}
+.login-container .success-message {
+  color: #28a745;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 600;
 }
 
 /* Responsive tweaks */
 @media (max-width: 600px) {
-  .month-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
-  .day {
-    min-height: 120px;
-  }
-  #summary {
+  #calendar, #summary {
     max-width: 100%;
     padding: 10px;
   }
-  #filterCaregiver,
-  #filterChild {
-    min-width: 100px;
-    margin-bottom: 8px;
+  .month-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+  .login-container {
+    margin: 40px 15px;
+    padding: 20px;
   }
 }
