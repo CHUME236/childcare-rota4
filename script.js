@@ -1,10 +1,4 @@
-// Import Firebase SDK (make sure your environment supports ES modules or use a bundler)
-// If you’re running this directly in browser without modules, you'll need to include Firebase scripts via <script> tags instead.
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
-
-// Your Firebase config
+// Firebase config + initialize (using compat SDK via script tags)
 const firebaseConfig = {
   apiKey: "AIzaSyBekbb2wy8cO1zJ9lTj7eC64sOZBYa-4PM",
   authDomain: "childcare-rota-4.firebaseapp.com",
@@ -13,13 +7,11 @@ const firebaseConfig = {
   messagingSenderId: "703216575309",
   appId: "1:703216575309:web:c69096afd83ce1bce40d04"
 };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// ======== Auth UI elements =======
+// UI Elements
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("login-btn");
@@ -28,22 +20,22 @@ const logoutBtn = document.getElementById("logout-btn");
 const authMessage = document.getElementById("auth-message");
 
 loginBtn.onclick = () => {
-  signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+  auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
     .then(() => authMessage.textContent = "Logged in successfully.")
     .catch(e => authMessage.textContent = "Login error: " + e.message);
 };
 
 signupBtn.onclick = () => {
-  createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+  auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
     .then(() => authMessage.textContent = "Account created & logged in.")
     .catch(e => authMessage.textContent = "Sign up error: " + e.message);
 };
 
 logoutBtn.onclick = () => {
-  signOut(auth).then(() => authMessage.textContent = "Logged out.");
+  auth.signOut().then(() => authMessage.textContent = "Logged out.");
 };
 
-onAuthStateChanged(auth, user => {
+auth.onAuthStateChanged(user => {
   if (user) {
     loginBtn.style.display = "none";
     signupBtn.style.display = "none";
@@ -66,21 +58,21 @@ onAuthStateChanged(auth, user => {
 
 // Save user data to Firestore
 async function saveUserData(userId, key, value) {
-  const userDocRef = doc(db, "users", userId);
-  const docSnap = await getDoc(userDocRef);
+  const userDocRef = db.collection("users").doc(userId);
+  const docSnap = await userDocRef.get();
   let data = {};
-  if (docSnap.exists()) {
+  if (docSnap.exists) {
     data = docSnap.data();
   }
   data[key] = value;
-  await setDoc(userDocRef, data);
+  await userDocRef.set(data);
 }
 
 // Load user data from Firestore and apply to UI
 async function loadUserData(userId) {
-  const userDocRef = doc(db, "users", userId);
-  const docSnap = await getDoc(userDocRef);
-  if (docSnap.exists()) {
+  const userDocRef = db.collection("users").doc(userId);
+  const docSnap = await userDocRef.get();
+  if (docSnap.exists) {
     const data = docSnap.data();
     applyDataToUI(data);
   } else {
@@ -89,7 +81,6 @@ async function loadUserData(userId) {
 }
 
 function clearCalendarData() {
-  // Clear selects, checkboxes, textareas from calendar UI
   document.querySelectorAll("select").forEach(s => s.value = "");
   document.querySelectorAll("label.checkbox-label input").forEach(c => c.checked = false);
   document.querySelectorAll("textarea.day-comment").forEach(t => t.value = "");
@@ -109,26 +100,6 @@ function applyDataToUI(data) {
     if (textarea) textarea.value = value;
   }
   document.querySelectorAll(".day").forEach(updateDay);
-}
-
-// ========== Your original calendar code below, slightly modified to save to Firestore ======
-
-document.addEventListener("DOMContentLoaded", () => {
-  setupButtons();
-  // buildCalendars() now called after login
-});
-
-function setupButtons() {
-  document.getElementById("showCalendarBtn").onclick = () => toggle("calendar");
-  document.getElementById("showSummaryBtn").onclick = () => { toggle("summary"); buildSummary(); };
-  document.getElementById("exportCsvBtn").onclick = exportCSV;
-  document.getElementById("filterCaregiver").onchange = buildSummary;
-  document.getElementById("filterChild").onchange = buildSummary;
-}
-
-function toggle(id) {
-  document.getElementById("calendar").style.display = id=="calendar"?"flex":"none";
-  document.getElementById("summary").style.display = id=="summary"?"block":"none";
 }
 
 function buildCalendars() {
@@ -180,7 +151,6 @@ function buildCalendars() {
 function createSelect(opts,def,key){
   const s=document.createElement("select"); s._key=key;
   s.innerHTML=opts.map(o=>`<option${o==""?' selected':''} value="${o}">${o||def}</option>`).join("");
-  s.className=oClass(def);
   return s;
 }
 function createCheckbox(label,key){
@@ -189,7 +159,6 @@ function createCheckbox(label,key){
   l.appendChild(c); l.appendChild(document.createTextNode(" "+label));
   return l;
 }
-function oClass(str){return str.includes("Drop")?"select-caregiver":"select-appointment";}
 function updateDay(cell){
   ["mother-dropoff","father-dropoff","mother-pickup","father-pickup"].forEach(c=>cell.classList.remove(c));
   const sel=cell.querySelectorAll("select");
@@ -202,3 +171,23 @@ function updateDay(cell){
 
 function buildSummary(){
   const tb=document.getElementById("summaryBody"); tb.innerHTML="";
+  // TODO: Add your summary building code here
+}
+
+function exportCSV(){
+  // TODO: Add your export CSV code here
+}
+
+// Setup buttons
+document.getElementById("showCalendarBtn").onclick = () => {
+  document.getElementById("calendar").style.display = "flex";
+  document.getElementById("summary").style.display = "none";
+};
+document.getElementById("showSummaryBtn").onclick = () => {
+  document.getElementById("calendar").style.display = "none";
+  document.getElementById("summary").style.display = "block";
+  buildSummary();
+};
+document.getElementById("exportCsvBtn").onclick = exportCSV;
+document.getElementById("filterCaregiver").onchange = buildSummary;
+document.getElementById("filterChild").onchange = buildSummary;
