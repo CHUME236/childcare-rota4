@@ -107,6 +107,9 @@ function toggle(id) {
   document.getElementById("summary").style.display = id === "summary" ? "block" : "none";
 }
 
+// Helper function to pad numbers with leading zeros
+const pad = (n) => (n < 10 ? "0" + n : n);
+
 // Build calendar UI
 function buildCalendars() {
   calendarEl.innerHTML = "";
@@ -139,7 +142,8 @@ function buildCalendars() {
         dow = (dateObj.getDay() + 6) % 7;
       if (dow === 0 || d === 1) wk++;
 
-      const key = `${year}-${m + 1}-${d}`,
+      // Use zero-padded month and day
+      const key = `${year}-${pad(m + 1)}-${pad(d)}`,
         cell = document.createElement("div");
       cell.className = "day";
 
@@ -234,48 +238,61 @@ function updateDay(cell) {
   const sel = cell.querySelectorAll("select");
   const d = sel[0].value,
     p = sel[1].value;
-  if (d) cell.classList.add(`${d}-dropoff`);
-  if (p) cell.classList.add(`${p}-pickup`);
-  const a = sel[2].value;
-  if (a) cell.classList.add("has-appointment");
-  else cell.classList.remove("has-appointment");
+  if (d) cell.classList.add(d + "-dropoff");
+  if (p) cell.classList.add(p + "-pickup");
 }
 
-// Build summary table with filtering
+// Build summary table with filtering and date padding
 function buildSummary() {
+  console.log("Building summary...");
   summaryBody.innerHTML = "";
-  const fc = filterCaregiver.value;
-  const ch = filterChild.value;
+
+  const fcRaw = filterCaregiver.value;
+  const chRaw = filterChild.value;
+  const fc = fcRaw ? fcRaw.toLowerCase() : "";
+  const ch = chRaw ? chRaw.toLowerCase() : "";
+
+  console.log(`Filters - Caregiver: "${fc}", Child: "${ch}"`);
 
   for (const key in calendarData) {
     const val = calendarData[key];
-    if (!val) continue;
+    if (val === null || val === undefined) continue;
 
-    const [date, type] = key.split("_");
-    if (!date || !type) continue;
+    const parts = key.split("_");
+    if (parts.length !== 2) continue;
 
+    const [dateRaw, type] = parts;
     if (!["dropoff", "pickup", "appointment", "ivy", "everly", "comment"].includes(type)) continue;
 
-    // Caregiver filter
+    // Zero pad date parts for consistent display
+    const [year, monthRaw, dayRaw] = dateRaw.split("-");
+    const month = pad(Number(monthRaw));
+    const day = pad(Number(dayRaw));
+    const date = `${year}-${month}-${day}`;
+
+    // Apply caregiver filter if set
     if (fc) {
       if (type === "dropoff" || type === "pickup") {
-        if (val !== fc) continue;
+        if (String(val).toLowerCase() !== fc) continue;
       }
     }
 
-    // Child filter
+    // Apply child filter if set
     if (ch) {
-      if ((type === "ivy" && ch !== "Ivy") || (type === "everly" && ch !== "Everly")) {
+      if ((type === "ivy" && ch !== "ivy") || (type === "everly" && ch !== "everly")) {
         continue;
       }
     }
 
+    // Create table row
     const tr = document.createElement("tr");
 
+    // Date cell
     const dateTd = document.createElement("td");
     dateTd.textContent = date;
     tr.appendChild(dateTd);
 
+    // Type cell
     const typeTd = document.createElement("td");
     let displayType = "";
     switch (type) {
@@ -303,6 +320,7 @@ function buildSummary() {
     typeTd.textContent = displayType;
     tr.appendChild(typeTd);
 
+    // Value cell
     const valTd = document.createElement("td");
     if ((type === "ivy" || type === "everly") && val === true) {
       valTd.textContent = "Yes";
@@ -313,33 +331,56 @@ function buildSummary() {
     }
     tr.appendChild(valTd);
 
-    // Optional row styling
+    // Add classes for styling
     if (type === "dropoff" || type === "pickup") {
-      if (val === "mother") tr.classList.add("summary-mother-only");
-      else if (val === "father") tr.classList.add("summary-father-only");
+      if (String(val).toLowerCase() === "mother") tr.classList.add("summary-mother-only");
+      else if (String(val).toLowerCase() === "father") tr.classList.add("summary-father-only");
     } else if (type === "ivy" || type === "everly") {
       tr.classList.add("summary-child");
     }
 
     summaryBody.appendChild(tr);
+    console.log(`Added summary row: ${date} - ${type} - ${val}`);
   }
 }
 
-// Export CSV (example implementation)
+// Export summary to CSV
 function exportCSV() {
   let csv = "Date,Type,Value\n";
   for (const key in calendarData) {
-    if (!calendarData[key]) continue;
-    const date = key.split("_")[0];
-    const type = key.split("_")[1] || "";
     const val = calendarData[key];
-    csv += `"${date}","${type}","${val}"\n`;
+    if (!val) continue;
+
+    const parts = key.split("_");
+    if (parts.length !== 2) continue;
+
+    const [dateRaw, type] = parts;
+    if (!["dropoff", "pickup", "appointment", "ivy", "everly", "comment"].includes(type)) continue;
+
+    const [year, monthRaw, dayRaw] = dateRaw.split("-");
+    const month = pad(Number(monthRaw));
+    const day = pad(Number(dayRaw));
+    const date = `${year}-${month}-${day}`;
+
+    const displayType = {
+      dropoff: "Drop-off",
+      pickup: "Pick-up",
+      appointment: "Appointment",
+      ivy: "Ivy",
+      everly: "Everly",
+      comment: "Comment",
+    }[type] || type;
+
+    let value = val;
+    if ((type === "ivy" || type === "everly") && val === true) value = "Yes";
+
+    csv += `"${date}","${displayType}","${value}"\n`;
   }
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar.csv";
+  a.download = "calendar_summary.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
