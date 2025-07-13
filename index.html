@@ -1,61 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Childcare Rota</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Childcare Calendar Rota</h1>
+  <h1>Childcare Rota (July–December 2025)</h1>
 
-  <div class="button-container">
-    <button onclick="showCalendar()">Calendar View</button>
-    <button onclick="showSummary()">Summary View</button>
-    <button onclick="exportSummaryToCSV()">Export Summary to CSV</button>
-  </div>
-
-  <div id="filters" style="display: none;">
-    <label>Filter by Caregiver:
-      <select id="caregiverFilter" onchange="renderSummaryTable()">
-        <option value="all">All</option>
-        <option value="mother">Mother</option>
-        <option value="father">Father</option>
-      </select>
-    </label>
-    <label>Filter by Child:
-      <select id="childFilter" onchange="renderSummaryTable()">
-        <option value="all">All</option>
-        <option value="ivy">Ivy</option>
-        <option value="everly">Everly</option>
-      </select>
-    </label>
+  <!-- Legend -->
+  <div class="legend">
+    <div><span class="legend-box" style="border-top: 15px solid #FFC0CB;"></span> Mother Drop-off</div>
+    <div><span class="legend-box" style="border-top: 15px solid #0096FF;"></span> Father Drop-off</div>
+    <div><span class="legend-box" style="border-bottom: 10px solid #ffff66;"></span> Mother Pick-up</div>
+    <div><span class="legend-box" style="border-bottom: 10px solid #66ff66;"></span> Father Pick-up</div>
+    <div><span class="legend-box" style="background-color: #ffe5e5;"></span> Appointment</div>
   </div>
 
   <div id="calendar"></div>
-  <div id="summary" style="display: none;"></div>
-
-  <div class="legend">
-    <div><span class="legend-box" style="background:#FFC0CB;"></span>Mother Drop-off</div>
-    <div><span class="legend-box" style="background:#0096FF;"></span>Father Drop-off</div>
-    <div><span class="legend-box" style="background:#ffff66;"></span>Mother Pick-up</div>
-    <div><span class="legend-box" style="background:#66ff66;"></span>Father Pick-up</div>
-    <div><span class="legend-box" style="background:#ffe5e5;"></span>Appointment</div>
-  </div>
-
-  <!-- Firebase Config (optional if integrating later) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4MhIUUWhnhF-UdqUkZqg_WeiSN0jUjx8",
-      authDomain: "childcare-rota.firebaseapp.com",
-      projectId: "childcare-rota",
-      storageBucket: "childcare-rota.appspot.com",
-      messagingSenderId: "884910967236",
-      appId: "1:884910967236:web:e6434fef7306bb0be67c91"
-    };
-    const app = initializeApp(firebaseConfig);
-  </script>
-
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
