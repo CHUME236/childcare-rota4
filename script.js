@@ -195,6 +195,7 @@ function updateDay(cell) {
 
 function buildSummary() {
   summaryBody.innerHTML = "";
+
   const fc = filterCaregiver.value.toLowerCase();
   const ch = filterChild.value.toLowerCase();
 
@@ -202,20 +203,20 @@ function buildSummary() {
 
   for (const key in calendarData) {
     const [date, field] = key.split("_");
-    const val = calendarData[key];
     if (!date || !field) continue;
     if (!grouped[date]) grouped[date] = {};
-    grouped[date][field] = val;
+    grouped[date][field] = calendarData[key];
   }
 
-  Object.entries(grouped).forEach(([date, day]) => {
-    if (
-      fc &&
-      (!day.dropoff || day.dropoff.toLowerCase() !== fc) &&
-      (!day.pickup || day.pickup.toLowerCase() !== fc)
-    ) return;
+  const sortedDates = Object.keys(grouped).sort();
 
-    if (ch && !day[ch]) return;
+  sortedDates.forEach(date => {
+    const day = grouped[date];
+
+    const caregiverMatch = !fc || (day.dropoff === fc || day.pickup === fc);
+    const childMatch = !ch || day[ch] === true;
+
+    if (!caregiverMatch || !childMatch) return;
 
     const tr = document.createElement("tr");
 
@@ -226,9 +227,9 @@ function buildSummary() {
     const infoTd = document.createElement("td");
     const info = [];
 
-    if (day.dropoff) info.push(`Drop-off: ${day.dropoff}`);
-    if (day.pickup) info.push(`Pick-up: ${day.pickup}`);
-    if (day.appointment) info.push(`Appointment: ${day.appointment}`);
+    if (day.dropoff) info.push(`Drop-off: ${capitalize(day.dropoff)}`);
+    if (day.pickup) info.push(`Pick-up: ${capitalize(day.pickup)}`);
+    if (day.appointment) info.push(`Appointment: ${capitalize(day.appointment)}`);
     if (day.ivy) info.push("Ivy");
     if (day.everly) info.push("Everly");
     if (day.comment) info.push(`Notes: ${day.comment}`);
@@ -236,18 +237,12 @@ function buildSummary() {
     infoTd.textContent = info.join(" | ");
     tr.appendChild(infoTd);
 
-    if (day.dropoff === "mother" || day.pickup === "mother") {
-      tr.classList.add("summary-mother-only");
-    } else if (day.dropoff === "father" || day.pickup === "father") {
-      tr.classList.add("summary-father-only");
-    }
-
-    if (day.ivy || day.everly) {
-      tr.classList.add("summary-child");
-    }
-
     summaryBody.appendChild(tr);
   });
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function exportCSV() {
