@@ -244,28 +244,82 @@ function updateDay(cell) {
 // Build summary table with filtering
 function buildSummary() {
   summaryBody.innerHTML = "";
-  const fc = filterCaregiver.value,
-    ch = filterChild.value;
+  const fc = filterCaregiver.value;
+  const ch = filterChild.value;
+
   for (const key in calendarData) {
-    if (!key.includes("_dropoff") && !key.includes("_pickup") && !key.includes("_appointment")) continue;
-    const date = key.split("_")[0];
-    const type = key.split("_")[1];
     const val = calendarData[key];
     if (!val) continue;
-    // Filtering logic can be added here as needed
+
+    const [date, type] = key.split("_");
+    if (!date || !type) continue;
+
+    if (!["dropoff", "pickup", "appointment", "ivy", "everly", "comment"].includes(type)) continue;
+
+    // Caregiver filter
+    if (fc) {
+      if (type === "dropoff" || type === "pickup") {
+        if (val !== fc) continue;
+      }
+    }
+
+    // Child filter
+    if (ch) {
+      if ((type === "ivy" && ch !== "Ivy") || (type === "everly" && ch !== "Everly")) {
+        continue;
+      }
+    }
 
     const tr = document.createElement("tr");
+
     const dateTd = document.createElement("td");
     dateTd.textContent = date;
     tr.appendChild(dateTd);
 
     const typeTd = document.createElement("td");
-    typeTd.textContent = type;
+    let displayType = "";
+    switch (type) {
+      case "dropoff":
+        displayType = "Drop-off";
+        break;
+      case "pickup":
+        displayType = "Pick-up";
+        break;
+      case "appointment":
+        displayType = "Appointment";
+        break;
+      case "ivy":
+        displayType = "Ivy";
+        break;
+      case "everly":
+        displayType = "Everly";
+        break;
+      case "comment":
+        displayType = "Comment";
+        break;
+      default:
+        displayType = type;
+    }
+    typeTd.textContent = displayType;
     tr.appendChild(typeTd);
 
     const valTd = document.createElement("td");
-    valTd.textContent = val;
+    if ((type === "ivy" || type === "everly") && val === true) {
+      valTd.textContent = "Yes";
+    } else if (type === "comment") {
+      valTd.textContent = val || "";
+    } else {
+      valTd.textContent = val;
+    }
     tr.appendChild(valTd);
+
+    // Optional row styling
+    if (type === "dropoff" || type === "pickup") {
+      if (val === "mother") tr.classList.add("summary-mother-only");
+      else if (val === "father") tr.classList.add("summary-father-only");
+    } else if (type === "ivy" || type === "everly") {
+      tr.classList.add("summary-child");
+    }
 
     summaryBody.appendChild(tr);
   }
