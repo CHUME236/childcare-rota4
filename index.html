@@ -1,63 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Childcare Calendar & Summary</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Childcare Calendar</title>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Childcare Calendar</h1>
 
-  <!-- Filter Section -->
-  <div id="filters">
-    <label for="filterCaregiver">Filter Caregiver:</label>
+<header>
+  <h1>Childcare Calendar</h1>
+  <button id="showCalendarBtn">Show Calendar</button>
+  <button id="showSummaryBtn">Show Summary</button>
+  <button id="exportCsvBtn">Export CSV</button>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<section id="filters" style="margin: 1em 0;">
+  <label>
+    Filter Caregiver:
     <select id="filterCaregiver">
       <option value="all">All</option>
       <option value="mother">Mother</option>
       <option value="father">Father</option>
     </select>
+  </label>
 
-    <label for="filterChild">Filter Child:</label>
+  <label style="margin-left: 1em;">
+    Filter Child:
     <select id="filterChild">
       <option value="all">All</option>
       <option value="ivy">Ivy</option>
       <option value="everly">Everly</option>
     </select>
-  </div>
+  </label>
+</section>
 
-  <!-- Buttons for toggle and export -->
-  <div class="button-container">
-    <button id="showCalendarBtn">Show Calendar</button>
-    <button id="showSummaryBtn">Show Summary</button>
-    <button id="exportCsvBtn">Export CSV</button>
-    <button id="logoutBtn">Logout</button>
-  </div>
+<!-- Calendar container -->
+<div id="calendar" style="display: flex; flex-wrap: wrap; gap: 1em;">
+  <!-- JS will generate calendar months here -->
+</div>
 
-  <!-- Calendar Container -->
-  <div id="calendar"></div>
+<!-- Summary container -->
+<section id="summary" style="display: none;">
+  <h2>Summary</h2>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Weekday</th>
+        <th>Drop-off</th>
+        <th>Pick-up</th>
+        <th>Appointment</th>
+        <th>Ivy</th>
+        <th>Everly</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody">
+      <!-- JS will populate summary rows here -->
+    </tbody>
+  </table>
+</section>
 
-  <!-- Summary Container -->
-  <section id="summary" style="display:none;">
-    <h2>Summary</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Weekday</th>
-          <th>Drop-off</th>
-          <th>Pick-up</th>
-          <th>Appointment</th>
-          <th>Ivy</th>
-          <th>Everly</th>
-          <th>Comments</th>
-        </tr>
-      </thead>
-      <tbody id="summaryBody"></tbody>
-    </table>
-  </section>
-
-  <!-- Scripts -->
-  <script type="module" src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
