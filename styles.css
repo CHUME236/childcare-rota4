@@ -1,149 +1,177 @@
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background: #f8f9fa;
+  background-color: #f9f9f9;
+  color: #333;
 }
 
-h1, h2 {
+h1 {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .button-container {
   text-align: center;
-  margin: 20px 0;
+  margin-bottom: 15px;
 }
 
 .button-container button {
   margin: 0 5px;
-  padding: 10px 16px;
-  font-size: 1em;
+  padding: 8px 16px;
+  font-size: 14px;
   cursor: pointer;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.button-container button:hover {
+  background-color: #eee;
 }
 
 #filters {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
+  text-align: center;
   margin-bottom: 20px;
 }
 
+#filters label {
+  margin: 0 10px 0 0;
+  font-weight: bold;
+}
+
+#filters select {
+  margin-right: 20px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
 #calendar {
-  max-width: 1000px;
-  margin: 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+section {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 260px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+}
+
+section h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #444;
 }
 
 .month-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  background: #fff;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
 }
 
 .day {
+  border: 1px solid #ddd;
   background: #fff;
-  padding: 8px;
-  border: 1px solid #ccc;
-  min-height: 160px;
+  min-height: 90px;
+  padding: 4px 4px 20px 4px;
   position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.day.empty {
-  background-color: #f1f1f1;
-  border: none;
-}
-
-.select-caregiver, .select-appointment {
-  width: 100%;
-  margin: 4px 0;
-  padding: 6px;
-  font-size: 0.9em;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-size: 0.9em;
-  margin: 4px 0;
-}
-
-.checkbox-label input {
-  margin-right: 4px;
-}
-
-.day-comment {
-  width: 100%;
-  margin-top: auto;
-  padding: 5px;
-  resize: vertical;
-  font-size: 0.85em;
-  min-height: 40px;
-}
-
-.week-overlay {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 0.7em;
-  background: #333;
-  color: #fff;
-  padding: 2px 6px;
+  font-size: 13px;
   border-radius: 4px;
 }
 
-#summary {
-  max-width: 1000px;
-  margin: 30px auto;
-  background: #fff;
-  padding: 20px;
-  border: 1px solid #ccc;
-  display: none;
+.day.empty {
+  background: #f0f0f0;
+  border: none;
 }
 
-#summary table {
+.day-number {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #555;
+}
+
+.select-caregiver, .select-appointment {
+  font-size: 12px;
+  margin: 2px 0;
   width: 100%;
-  border-collapse: collapse;
+  box-sizing: border-box;
+  border-radius: 3px;
+  border: 1px solid #bbb;
+  padding: 2px 4px;
 }
 
-#summary th, #summary td {
-  padding: 8px;
+.checkbox-label {
+  font-size: 12px;
+  margin-top: 2px;
+  user-select: none;
+}
+
+.checkbox-label input {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.day-comment {
+  margin-top: auto;
+  width: 100%;
+  font-size: 12px;
+  border-radius: 3px;
   border: 1px solid #ccc;
-  text-align: center;
+  resize: vertical;
+  min-height: 32px;
+  padding: 3px 4px;
+  font-family: Arial, sans-serif;
 }
 
-thead {
-  background-color: #e9ecef;
-}
-
-/* Pickup and Dropoff styles */
-.mother-dropoff {
-  border-top: 6px solid #ff85a2;
-}
-
-.father-dropoff {
-  border-top: 6px solid #85c1ff;
-}
-
+/* Color styling for pickup selection */
 .mother-pickup {
-  border-bottom: 6px solid #ffe066;
+  background-color: #d0e8ff;
 }
 
 .father-pickup {
-  border-bottom: 6px solid #9dffb0;
+  background-color: #ffd0d0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .month-grid {
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  }
+/* Also style drop-off */
+.mother-dropoff {
+  border: 2px solid #3399ff;
 }
+
+.father-dropoff {
+  border: 2px solid #ff6666;
+}
+
+.has-appointment {
+  font-weight: bold;
+  border-left: 4px solid #3a8d3a;
+}
+
+/* Summary table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+th, td {
+  border: 1px solid #bbb;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #eee;
+}
+
