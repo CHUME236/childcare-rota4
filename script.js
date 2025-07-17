@@ -1,187 +1,132 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBekbb2wy8cO1zJ9lTj7eC64sOZBYa-4PM",
-  authDomain: "childcare-rota-4.firebaseapp.com",
-  projectId: "childcare-rota-4",
-  storageBucket: "childcare-rota-4.firebasestorage.app",
-  messagingSenderId: "703216575309",
-  appId: "1:703216575309:web:c69096afd83ce1bce40d04",
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser = null;
-let calendarData = {};
-
-const calendarEl = document.getElementById("calendar");
-const summaryBody = document.getElementById("summaryBody");
-const filterCaregiver = document.getElementById("filterCaregiver");
-const filterChild = document.getElementById("filterChild");
-const logoutBtn = document.getElementById("logoutBtn");
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    await loadUserData();
-    setupButtons();
-    buildCalendars();
-  } else {
-    window.location.href = "login.html";
-  }
-});
-
-logoutBtn.onclick = () => signOut(auth);
-
-async function loadUserData() {
-  const docRef = doc(db, "sharedCalendar", "main");
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    calendarData = docSnap.data().calendarData || {};
-  } else {
-    calendarData = {};
-  }
-}
-
-async function saveCalendarData() {
-  await setDoc(doc(db, "sharedCalendar", "main"), { calendarData });
-}
-
-function setupButtons() {
-  document.getElementById("showCalendarBtn").onclick = () => {
-    document.getElementById("calendar").style.display = "block";
-    document.getElementById("summary").style.display = "none";
-  };
-  document.getElementById("showSummaryBtn").onclick = () => {
-    document.getElementById("calendar").style.display = "none";
-    document.getElementById("summary").style.display = "block";
-    buildSummary();
-  };
-  document.getElementById("exportCsvBtn").onclick = exportCSV;
-  filterCaregiver.onchange = buildSummary;
-  filterChild.onchange = buildSummary;
-}
-function buildCalendars() {
+function renderCalendar(month, year) {
   calendarEl.innerHTML = "";
-  const year = 2025;
-  const months = ["July", "August", "September", "October", "November", "December"];
 
-  for (let m = 6; m <= 11; m++) {
-    const monthSection = document.createElement("section");
-    const title = document.createElement("h2");
-    title.textContent = `${months[m - 6]} ${year}`;
-    monthSection.appendChild(title);
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-    const grid = document.createElement("div");
-    grid.className = "month-grid";
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const firstWeekday = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
 
-    const firstDay = new Date(year, m, 1).getDay();
-    const daysInMonth = new Date(year, m + 1, 0).getDate();
+  const grid = document.createElement("div");
+  grid.className = "month-grid";
 
-    // Fill empty slots before 1st
-    for (let i = 0; i < firstDay; i++) {
-      const empty = document.createElement("div");
-      empty.className = "day empty";
-      grid.appendChild(empty);
-    }
+  // Add headers
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  dayNames.forEach(day => {
+    const header = document.createElement("div");
+    header.className = "day-header";
+    header.textContent = day;
+    grid.appendChild(header);
+  });
 
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateKey = `${year}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const dayCell = document.createElement("div");
-      dayCell.className = "day";
+  const offset = firstWeekday;
 
-      const dateLabel = document.createElement("div");
-      dateLabel.className = "date-number";
-      dateLabel.textContent = `${d}`;
-      dayCell.appendChild(dateLabel);
-
-      const drop = createSelect(["", "mother", "father"], "--Drop‑off--", dateKey + "_dropoff");
-      const pick = createSelect(["", "mother", "father"], "--Pick‑up--", dateKey + "_pickup");
-      const app = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", dateKey + "_appointment");
-
-      [drop, pick, app].forEach(sel => {
-        sel.onchange = async () => {
-          calendarData[sel._key] = sel.value;
-          await saveCalendarData();
-          updateDayStyles(dayCell);
-        };
-      });
-
-      const ivy = createCheckbox("Ivy", dateKey + "_ivy");
-      const ever = createCheckbox("Everly", dateKey + "_everly");
-
-      [ivy, ever].forEach(ch => {
-        ch.querySelector("input").onchange = async (e) => {
-          calendarData[ch._key] = e.target.checked;
-          await saveCalendarData();
-        };
-      });
-
-      const notes = document.createElement("textarea");
-      notes.className = "day-comment";
-      notes.placeholder = "Notes...";
-      notes.value = calendarData[dateKey + "_comment"] || "";
-      notes.oninput = async () => {
-        calendarData[dateKey + "_comment"] = notes.value;
-        await saveCalendarData();
-      };
-
-      drop.value = calendarData[dateKey + "_dropoff"] || "";
-      pick.value = calendarData[dateKey + "_pickup"] || "";
-      app.value = calendarData[dateKey + "_appointment"] || "";
-      ivy.querySelector("input").checked = calendarData[dateKey + "_ivy"] === true;
-      ever.querySelector("input").checked = calendarData[dateKey + "_everly"] === true;
-
-      [drop, pick, app, ivy, ever, notes].forEach(el => dayCell.appendChild(el));
-
-      updateDayStyles(dayCell);
-      grid.appendChild(dayCell);
-    }
-
-    monthSection.appendChild(grid);
-    calendarEl.appendChild(monthSection);
+  for (let i = 0; i < offset; i++) {
+    const emptyCell = document.createElement("div");
+    emptyCell.className = "day empty";
+    grid.appendChild(emptyCell);
   }
+
+  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    const cell = document.createElement("div");
+    cell.className = "day";
+
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
+    const dayData = {
+      dropoff: calendarData[dateStr + "_dropoff"] || "",
+      pickup: calendarData[dateStr + "_pickup"] || "",
+      appointment: calendarData[dateStr + "_appointment"] || "",
+      ivy: calendarData[dateStr + "_ivy"] || false,
+      everly: calendarData[dateStr + "_everly"] || false,
+      comment: calendarData[dateStr + "_comment"] || ""
+    };
+
+    const dateNumber = document.createElement("div");
+    dateNumber.className = "date-number";
+    dateNumber.textContent = dayNum;
+    cell.appendChild(dateNumber);
+
+    const dropoff = createSelect(["", "mother", "father"], "--Drop-off--", dateStr + "_dropoff", dayData.dropoff);
+    const pickup = createSelect(["", "mother", "father"], "--Pick-up--", dateStr + "_pickup", dayData.pickup);
+    const appointment = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", dateStr + "_appointment", dayData.appointment);
+
+    const ivy = createCheckbox("Ivy", dateStr + "_ivy", dayData.ivy);
+    const everly = createCheckbox("Everly", dateStr + "_everly", dayData.everly);
+
+    const notes = document.createElement("textarea");
+    notes.placeholder = "Notes...";
+    notes.value = dayData.comment;
+    notes.oninput = async () => {
+      calendarData[dateStr + "_comment"] = notes.value;
+      await saveCalendarData();
+    };
+
+    [dropoff, pickup, appointment, ivy, everly, notes].forEach(el => cell.appendChild(el));
+    updateDayStyle(cell, dropoff.value, pickup.value);
+
+    grid.appendChild(cell);
+  }
+
+  calendarEl.appendChild(grid);
+}
+function createSelect(options, defaultText, key, selectedValue) {
+  const select = document.createElement("select");
+  select.innerHTML = options.map(opt => `<option value="${opt}"${opt === selectedValue ? " selected" : ""}>${opt || defaultText}</option>`).join("");
+  select.value = selectedValue;
+  select.onchange = async () => {
+    calendarData[key] = select.value;
+    updateDayStyle(select.closest(".day"), calendarData[key.replace("pickup", "dropoff")], select.value);
+    await saveCalendarData();
+  };
+  return select;
 }
 
-function createSelect(opts, def, key) {
-  const s = document.createElement("select");
-  s._key = key;
-  s.className = def.includes("Drop") ? "select-caregiver" : "select-appointment";
-  s.innerHTML = opts.map(o => `<option value="${o}"${o === "" ? " selected" : ""}>${o || def}</option>`).join("");
-  return s;
+function createCheckbox(label, key, checked) {
+  const wrapper = document.createElement("label");
+  wrapper.textContent = label;
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = checked;
+  input.onchange = async () => {
+    calendarData[key] = input.checked;
+    await saveCalendarData();
+  };
+  wrapper.prepend(input);
+  return wrapper;
 }
 
-function createCheckbox(label, key) {
-  const l = document.createElement("label");
-  l.className = "checkbox-label";
-  l._key = key;
-  const c = document.createElement("input");
-  c.type = "checkbox";
-  l.appendChild(c);
-  l.appendChild(document.createTextNode(" " + label));
-  return l;
-}
-
-function updateDayStyles(cell) {
-  const [drop, pick] = cell.querySelectorAll("select");
+function updateDayStyle(cell, drop, pick) {
   cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup");
-
-  if (drop.value) cell.classList.add(`${drop.value}-dropoff`);
-  if (pick.value) cell.classList.add(`${pick.value}-pickup`);
+  if (drop === "mother") cell.classList.add("mother-dropoff");
+  if (drop === "father") cell.classList.add("father-dropoff");
+  if (pick === "mother") cell.classList.add("mother-pickup");
+  if (pick === "father") cell.classList.add("father-pickup");
 }
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function exportCSV() {
+  let csv = "Date,Type,Value\n";
+  for (const key in calendarData) {
+    const val = calendarData[key];
+    if (!val && val !== false) continue;
+    csv += `"${key}","${typeof val}","${val}"\n`;
+  }
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "calendar-export.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function buildSummary() {
   summaryBody.innerHTML = "";
 
@@ -211,6 +156,7 @@ function buildSummary() {
     if (!caregiverMatch || !childMatch) return;
 
     const tr = document.createElement("tr");
+
     const weekday = new Date(date).toLocaleDateString(undefined, { weekday: "long" });
 
     tr.innerHTML = `
@@ -226,25 +172,4 @@ function buildSummary() {
 
     summaryBody.appendChild(tr);
   });
-}
-
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function exportCSV() {
-  let csv = "Date,Type,Value\n";
-  for (const key in calendarData) {
-    const val = calendarData[key];
-    if (!val && val !== false) continue;
-    csv += `"${key}","${typeof val}","${val}"\n`;
-  }
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "calendar-export.csv";
-  a.click();
-  URL.revokeObjectURL(url);
 }
