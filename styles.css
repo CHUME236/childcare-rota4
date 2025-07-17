@@ -1,7 +1,7 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f9f9f9;
+  padding: 20px;
+  background: #f5f5f5;
   color: #333;
 }
 
@@ -11,179 +11,210 @@ h1 {
 }
 
 .button-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+  text-align: center;
   margin-bottom: 15px;
 }
 
+.button-container button {
+  margin: 0 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.button-container button:hover {
+  background-color: #e0e0e0;
+}
+
 #filters {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+  text-align: center;
   margin-bottom: 20px;
 }
 
 #filters label {
+  margin-right: 8px;
   font-weight: bold;
 }
 
-#calendar-container {
-  max-width: 900px;
-  margin: 0 auto 40px auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 20px;
+#filters select {
+  margin-right: 20px;
+  padding: 4px 8px;
+  font-size: 14px;
 }
 
-.month-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+#monthNavigation {
+  text-align: center;
+  margin: 20px 0;
 }
 
-.month-navigation button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  font-size: 1rem;
-  border-radius: 4px;
+#monthNavigation button {
+  margin: 0 10px;
+  padding: 6px 14px;
+  font-size: 14px;
   cursor: pointer;
-  user-select: none;
-  transition: background-color 0.25s;
-}
-.month-navigation button:hover {
-  background: #0056b3;
-}
-
-#monthYearLabel {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #444;
-  user-select: none;
+  border-radius: 4px;
+  border: 1px solid #666;
+  background-color: #fafafa;
+  transition: background-color 0.3s ease;
 }
 
-#calendar {
+#monthNavigation button:hover {
+  background-color: #ddd;
+}
+
+#monthLabel {
+  font-weight: 700;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 10px;
+  max-width: 960px;
+  margin: 0 auto 40px auto;
 }
 
-.day-name {
-  font-weight: bold;
+.day-header {
+  font-weight: 700;
   text-align: center;
-  color: #555;
-  padding-bottom: 6px;
-  border-bottom: 2px solid #ddd;
+  padding: 8px 0;
+  background-color: #d9d9d9;
+  border-radius: 4px;
   user-select: none;
 }
 
 .day {
-  min-height: 130px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px 8px 8px 8px;
-  background-color: #fefefe;
+  background: white;
+  border-radius: 6px;
+  padding: 10px 8px 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  font-size: 0.9rem;
+  font-size: 13px;
+  min-height: 180px;
+  overflow: hidden;
   position: relative;
-  box-sizing: border-box;
-  transition: box-shadow 0.3s;
-}
-.day:hover {
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .day.empty {
-  background-color: transparent;
-  border: none;
+  background: transparent;
+  box-shadow: none;
   pointer-events: none;
 }
 
-.day-number {
-  position: absolute;
-  top: 8px;
-  right: 10px;
+.date-number {
   font-weight: bold;
-  font-size: 1.2rem;
-  color: #666;
-  user-select: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #222;
 }
 
-select, textarea, label.checkbox-label {
-  margin-top: 6px;
-  font-size: 0.85rem;
+/* Select and checkbox styling inside day cells */
+.day select,
+.day textarea {
+  font-size: 12px;
+  margin-bottom: 6px;
   width: 100%;
   box-sizing: border-box;
-}
-
-select {
-  padding: 5px;
-  border-radius: 4px;
   border: 1px solid #ccc;
-  transition: background-color 0.3s;
-}
-
-textarea.day-comment {
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-family: Arial, sans-serif;
   resize: vertical;
-  min-height: 50px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  padding: 5px;
 }
 
-.checkbox-label {
+.day textarea {
+  min-height: 40px;
+  max-height: 70px;
+}
+
+.day label {
+  font-weight: normal;
+  font-size: 12px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: normal;
+  cursor: pointer;
 }
 
-#summary {
-  max-width: 900px;
-  margin: 20px auto;
+.day label input[type="checkbox"] {
+  margin-right: 6px;
+  cursor: pointer;
 }
 
-#summary h2 {
-  text-align: center;
-  margin-bottom: 10px;
+/* Color coding for drop-off */
+.mother-dropoff {
+  border-left: 4px solid #4a90e2; /* blue */
 }
 
+.father-dropoff {
+  border-left: 4px solid #e27a4a; /* orange */
+}
+
+/* Color coding for pick-up */
+.mother-pickup {
+  border-right: 4px solid #4a90e2;
+}
+
+.father-pickup {
+  border-right: 4px solid #e27a4a;
+}
+
+/* Summary table */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-top: 15px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 14px;
+}
+
+thead tr {
+  background-color: #4a90e2;
+  color: white;
 }
 
 th, td {
-  padding: 8px 12px;
+  padding: 8px 10px;
   border: 1px solid #ddd;
   text-align: center;
-  font-size: 0.9rem;
+  vertical-align: middle;
 }
 
-th {
-  background-color: #f0f0f0;
-  font-weight: bold;
+tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
 }
 
-/* Highlight colors for dropoff and pickup selections */
-
-.mother-dropoff select,
-.mother-pickup select {
-  background-color: #cce5ff; /* Light blue */
+tbody tr:hover {
+  background-color: #e3f0fc;
+  cursor: default;
 }
 
-.father-dropoff select,
-.father-pickup select {
-  background-color: #ffcce5; /* Light pink */
+/* Scroll for notes if needed */
+.day textarea {
+  overflow-y: auto;
 }
 
-.has-appointment select {
-  border: 2px solid #ffa500; /* Orange border for appointments */
+/* Responsive tweaks */
+@media (max-width: 800px) {
+  .month-grid {
+    max-width: 100%;
+    gap: 6px;
+  }
+  .day {
+    min-height: 160px;
+  }
+  .button-container button,
+  #monthNavigation button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
 }
