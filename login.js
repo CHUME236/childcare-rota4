@@ -3,7 +3,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 
 // Firebase config
@@ -13,19 +13,20 @@ const firebaseConfig = {
   projectId: "childcare-rota-4",
   storageBucket: "childcare-rota-4.firebasestorage.app",
   messagingSenderId: "703216575309",
-  appId: "1:703216575309:web:c69096afd83ce1bce40d04",
+  appId: "1:703216575309:web:c69096afd83ce1bce40d04"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// DOM elements
 const email = document.getElementById("email");
 const password = document.getElementById("password");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
 const authError = document.getElementById("authError");
 
-// Redirect if already logged in
+// Auto-redirect if already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
     window.location.href = "index.html";
