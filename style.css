@@ -56,9 +56,7 @@ h1, h2 {
   display: flex;
   flex-direction: column;
 }
-.day:hover {
-  background: #f0f8ff;
-}
+/* Removed .day:hover */
 .day.empty {
   background-color: #f9f9f9;
   border: none;
@@ -87,10 +85,7 @@ h1, h2 {
 .father-pickup {
   border-bottom: 10px solid #66ff66;
 }
-.has-appointment {
-  background: #ffe5e5 !important;
-  border-top: 3px solid #d32f2f;
-}
+/* Removed .has-appointment */
 .week-overlay {
   position: absolute;
   top: 4px;
