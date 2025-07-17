@@ -1,68 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Childcare Calendar</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Childcare Rota</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header>
+    <h1>Childcare Rota</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
 
-<header>
-  <h1>Childcare Calendar</h1>
-  <button id="showCalendarBtn">Show Calendar</button>
-  <button id="showSummaryBtn">Show Summary</button>
-  <button id="exportCsvBtn">Export CSV</button>
-  <button id="logoutBtn">Logout</button>
-</header>
+  <nav>
+    <button id="showCalendarBtn">Calendar View</button>
+    <button id="showSummaryBtn">Summary View</button>
+    <button id="exportCsvBtn">Export CSV</button>
+  </nav>
 
-<section id="filters" style="margin: 1em 0;">
-  <label>
-    Filter Caregiver:
-    <select id="filterCaregiver">
-      <option value="all">All</option>
-      <option value="mother">Mother</option>
-      <option value="father">Father</option>
-    </select>
-  </label>
+  <main id="calendar"></main>
 
-  <label style="margin-left: 1em;">
-    Filter Child:
-    <select id="filterChild">
-      <option value="all">All</option>
-      <option value="ivy">Ivy</option>
-      <option value="everly">Everly</option>
-    </select>
-  </label>
-</section>
+  <section id="summary" style="display: none;">
+    <div class="filters">
+      <label>
+        Caregiver:
+        <select id="filterCaregiver">
+          <option value="all">All</option>
+          <option value="mother">Mother</option>
+          <option value="father">Father</option>
+        </select>
+      </label>
+      <label>
+        Child:
+        <select id="filterChild">
+          <option value="all">All</option>
+          <option value="ivy">Ivy</option>
+          <option value="everly">Everly</option>
+        </select>
+      </label>
+    </div>
 
-<!-- Calendar container -->
-<div id="calendar" style="display: flex; flex-wrap: wrap; gap: 1em;">
-  <!-- JS will generate calendar months here -->
-</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Day</th>
+          <th>Drop-off</th>
+          <th>Pick-up</th>
+          <th>Appointment</th>
+          <th>Ivy</th>
+          <th>Everly</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </section>
 
-<!-- Summary container -->
-<section id="summary" style="display: none;">
-  <h2>Summary</h2>
-  <table border="1" cellspacing="0" cellpadding="5">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Weekday</th>
-        <th>Drop-off</th>
-        <th>Pick-up</th>
-        <th>Appointment</th>
-        <th>Ivy</th>
-        <th>Everly</th>
-        <th>Notes</th>
-      </tr>
-    </thead>
-    <tbody id="summaryBody">
-      <!-- JS will populate summary rows here -->
-    </tbody>
-  </table>
-</section>
-
-<script type="module" src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
