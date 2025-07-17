@@ -92,20 +92,16 @@ function buildCalendars() {
 
     const first = new Date(year, m, 1).getDay();
     const daysIn = new Date(year, m + 1, 0).getDate();
-    const offset = (first + 6) % 7;
+    const offset = (first + 6) % 7; // Convert Sunday=0 to Monday=0
 
     for (let i = 0; i < offset; i++) {
-      const e = document.createElement("div");
+      let e = document.createElement("div");
       e.className = "day empty";
       grid.appendChild(e);
     }
 
-    let wk = 0;
     for (let d = 1; d <= daysIn; d++) {
       const dateObj = new Date(year, m, d);
-      const dow = (dateObj.getDay() + 6) % 7;
-      if (dow === 0 || d === 1) wk++;
-
       const month = String(m + 1).padStart(2, '0');
       const day = String(d).padStart(2, '0');
       const key = `${year}-${month}-${day}`;
@@ -113,10 +109,11 @@ function buildCalendars() {
       const cell = document.createElement("div");
       cell.className = "day";
 
-      const wov = document.createElement("div");
-      wov.className = "week-overlay";
-      wov.textContent = wk % 2 ? "Week 1" : "Week 2";
-      cell.appendChild(wov);
+      // Add day number with ordinal suffix in top-left corner
+      const dayNumber = document.createElement("div");
+      dayNumber.className = "day-number";
+      dayNumber.textContent = getOrdinal(d);
+      cell.appendChild(dayNumber);
 
       const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff");
       const pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup");
@@ -186,18 +183,16 @@ function createCheckbox(label, key) {
 }
 
 function updateDay(cell) {
-  // Remove previous styles
-  cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup");
-  
-  const [drop, pick] = cell.querySelectorAll("select");
+  // Remove pickup/dropoff and appointment classes first
+  cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment");
 
-  if (drop.value === "mother") cell.classList.add("mother-dropoff");
-  if (drop.value === "father") cell.classList.add("father-dropoff");
-
-  if (pick.value === "mother") cell.classList.add("mother-pickup");
-  if (pick.value === "father") cell.classList.add("father-pickup");
+  const [drop, pick, app] = cell.querySelectorAll("select");
+  if (drop.value) cell.classList.add(`${drop.value}-dropoff`);
+  if (pick.value) cell.classList.add(`${pick.value}-pickup`);
+  if (app.value) cell.classList.add("has-appointment");
 }
 
+// Summary build function
 function buildSummary() {
   summaryBody.innerHTML = "";
 
@@ -228,16 +223,17 @@ function buildSummary() {
     if (!caregiverMatch || !childMatch) return;
 
     const tr = document.createElement("tr");
+
     const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
 
     tr.innerHTML = `
       <td>${date}</td>
       <td>${weekday}</td>
-      <td>${day.dropoff ? capitalize(day.dropoff) : ""}</td>
-      <td>${day.pickup ? capitalize(day.pickup) : ""}</td>
-      <td>${day.appointment ? capitalize(day.appointment) : ""}</td>
-      <td>${day.ivy ? "✓" : ""}</td>
-      <td>${day.everly ? "✓" : ""}</td>
+      <td>${day.dropoff || ""}</td>
+      <td>${day.pickup || ""}</td>
+      <td>${day.appointment || ""}</td>
+      <td>${day.ivy ? "✔" : ""}</td>
+      <td>${day.everly ? "✔" : ""}</td>
       <td>${day.comment || ""}</td>
     `;
 
@@ -245,22 +241,63 @@ function buildSummary() {
   });
 }
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 function exportCSV() {
-  let csv = "Date,Type,Value\n";
+  let csv = "Date,Weekday,Drop-off,Pick-up,Appointment,Ivy,Everly,Notes\n";
+
+  const fc = filterCaregiver.value.toLowerCase();
+  const ch = filterChild.value.toLowerCase();
+
+  const grouped = {};
+
   for (const key in calendarData) {
-    const val = calendarData[key];
-    if (!val && val !== false) continue;
-    csv += `"${key}","${typeof val}","${val}"\n`;
+    const sepIndex = key.indexOf("_");
+    if (sepIndex === -1) continue;
+
+    const date = key.slice(0, sepIndex);
+    const field = key.slice(sepIndex + 1);
+
+    if (!grouped[date]) grouped[date] = {};
+    grouped[date][field] = calendarData[key];
   }
+
+  const sortedDates = Object.keys(grouped).sort();
+
+  sortedDates.forEach(date => {
+    const day = grouped[date];
+
+    const caregiverMatch = fc === "all" || day.dropoff === fc || day.pickup === fc;
+    const childMatch = ch === "all" || day[ch] === true;
+
+    if (!caregiverMatch || !childMatch) return;
+
+    const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
+
+    csv += [
+      date,
+      weekday,
+      day.dropoff || "",
+      day.pickup || "",
+      day.appointment || "",
+      day.ivy ? "Yes" : "",
+      day.everly ? "Yes" : "",
+      `"${(day.comment || "").replace(/"/g, '""')}"`
+    ].join(",") + "\n";
+  });
+
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar-export.csv";
+  a.download = "childcare_rota.csv";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function getOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"],
+        v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
