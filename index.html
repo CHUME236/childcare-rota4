@@ -7,44 +7,40 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Childcare Rota</h1>
-    <button id="logoutBtn">Logout</button>
-  </header>
+  <h1>Childcare Rota</h1>
 
-  <nav>
+  <div class="button-container">
     <button id="showCalendarBtn">Calendar View</button>
     <button id="showSummaryBtn">Summary View</button>
     <button id="exportCsvBtn">Export CSV</button>
-  </nav>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-  <main id="calendar"></main>
+  <div id="filters">
+    <label for="filterCaregiver">Filter by Caregiver:</label>
+    <select id="filterCaregiver">
+      <option value="all">All</option>
+      <option value="mother">Mother</option>
+      <option value="father">Father</option>
+    </select>
 
-  <section id="summary" style="display: none;">
-    <div class="filters">
-      <label>
-        Caregiver:
-        <select id="filterCaregiver">
-          <option value="all">All</option>
-          <option value="mother">Mother</option>
-          <option value="father">Father</option>
-        </select>
-      </label>
-      <label>
-        Child:
-        <select id="filterChild">
-          <option value="all">All</option>
-          <option value="ivy">Ivy</option>
-          <option value="everly">Everly</option>
-        </select>
-      </label>
-    </div>
+    <label for="filterChild">Filter by Child:</label>
+    <select id="filterChild">
+      <option value="all">All</option>
+      <option value="ivy">Ivy</option>
+      <option value="everly">Everly</option>
+    </select>
+  </div>
 
+  <div id="calendar"></div>
+
+  <div id="summary">
+    <h2>Summary</h2>
     <table>
       <thead>
         <tr>
           <th>Date</th>
-          <th>Day</th>
+          <th>Weekday</th>
           <th>Drop-off</th>
           <th>Pick-up</th>
           <th>Appointment</th>
@@ -55,7 +51,7 @@
       </thead>
       <tbody id="summaryBody"></tbody>
     </table>
-  </section>
+  </div>
 
   <script type="module" src="script.js"></script>
 </body>
