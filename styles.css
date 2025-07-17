@@ -1,103 +1,163 @@
-/* === Original Styles === */
+/* === General Styles === */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
   background: #f5f5f5;
+  color: #333;
 }
+
 h1, h2 {
   text-align: center;
+  font-weight: 600;
+  margin-bottom: 0.5em;
 }
-.button-container {
+
+header {
   text-align: center;
-  margin: 20px;
+  margin-bottom: 20px;
 }
-.button-container button {
-  margin: 0 5px;
-  padding: 8px 16px;
+
+header button {
+  margin: 0 8px;
+  padding: 10px 16px;
   font-size: 1em;
   cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #0096FF;
+  color: white;
+  transition: background-color 0.3s ease;
 }
-.legend {
-  max-width: 400px;
-  margin: 20px auto;
-  padding: 10px;
-  background: #fff;
-  border: 1px solid #ccc;
+
+header button:hover {
+  background-color: #007acc;
+}
+
+/* === Filters Section === */
+#filters {
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 25px;
   flex-wrap: wrap;
 }
-.legend-box {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 4px;
+
+#filters label {
+  font-weight: 600;
+  font-size: 1em;
 }
+
+#filters select {
+  margin-left: 8px;
+  padding: 5px 8px;
+  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-width: 120px;
+}
+
+/* === Calendar Styles === */
 #calendar {
   max-width: 1000px;
   margin: 0 auto;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 40px;
+  justify-content: center;
 }
+
+#calendar section {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  flex: 1 1 300px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+}
+
+#calendar h2 {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.25em;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 .month-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
 }
+
 .day {
   background: #fff;
-  padding: 10px;
   border: 1px solid #ccc;
+  padding: 10px;
   min-height: 160px;
-  position: relative;
-  transition: background 0.3s;
   display: flex;
   flex-direction: column;
+  border-radius: 6px;
+  box-sizing: border-box;
+  position: relative;
 }
-/* Removed .day:hover */
+
 .day.empty {
   background-color: #f9f9f9;
   border: none;
+  pointer-events: none;
 }
+
 .day-header {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 1em;
+  user-select: none;
 }
-.select-caregiver, .select-appointment {
-  width: 100%;
-  margin: 4px 0 8px 0;
-  padding: 6px;
-  font-size: 0.95em;
-}
-.mother-dropoff {
-  background-color: #ffc0cb; /* light pink */
-  border-top: 15px solid #FFC0CB;
-}
-.father-dropoff {
-  background-color: #add8e6; /* light blue */
-  border-top: 15px solid #0096FF;
-}
-.mother-pickup {
-  border-bottom: 10px solid #ffff66;
-}
-.father-pickup {
-  border-bottom: 10px solid #66ff66;
-}
-/* Removed .has-appointment */
+
 .week-overlay {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   background: #222;
   color: #fff;
   font-size: 0.75em;
   padding: 2px 6px;
   border-radius: 4px;
-  opacity: 0.9;
+  opacity: 0.8;
   user-select: none;
 }
+
+/* Select dropdown styling */
+.select-caregiver, .select-appointment {
+  width: 100%;
+  margin: 6px 0 10px 0;
+  padding: 6px;
+  font-size: 0.95em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  appearance: none;
+  background: white url("data:image/svg+xml,%3Csvg fill='none' stroke='%23999' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 10px center;
+  background-size: 12px;
+}
+
+/* Checkbox label styling */
+.checkbox-label {
+  font-size: 0.9em;
+  margin: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.checkbox-label input {
+  margin-right: 6px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Textarea styling */
 .day-comment {
   width: 100%;
   margin-top: 6px;
@@ -107,150 +167,110 @@ h1, h2 {
   font-size: 0.9em;
   box-sizing: border-box;
   flex-grow: 1;
-}
-.checkbox-label {
-  font-size: 0.9em;
-  margin: 4px 8px 4px 0;
-  display: inline-flex;
-  align-items: center;
-}
-.checkbox-label input {
-  margin-right: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-family: inherit;
 }
 
-/* Summary styles */
+/* Color coded caregiver dropoff/pickup backgrounds and borders */
+.mother-dropoff {
+  background-color: #fff0f5; /* very light pink */
+  border-top: 12px solid #ff99bb;
+}
+
+.father-dropoff {
+  background-color: #f0f8ff; /* very light blue */
+  border-top: 12px solid #0096FF;
+}
+
+.mother-pickup {
+  border-bottom: 10px solid #ffff99;
+}
+
+.father-pickup {
+  border-bottom: 10px solid #99ff99;
+}
+
+/* === Summary Styles === */
 #summary {
   max-width: 1000px;
-  margin: 20px auto;
-  background: #fff;
+  margin: 0 auto 40px auto;
+  background: white;
   padding: 20px;
-  border: 1px solid #ccc;
-  display: none; /* hide by default */
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
 }
+
+#summary h2 {
+  margin-top: 0;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
 #summary table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95em;
+  table-layout: fixed;
 }
+
 #summary th, #summary td {
   border: 1px solid #ccc;
-  padding: 6px 8px;
+  padding: 8px 10px;
   text-align: center;
+  word-wrap: break-word;
 }
+
 thead {
-  background: #eee;
+  background: #f0f0f0;
+  font-weight: 700;
 }
+
+#summary tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Color coded summary rows */
 .summary-mother-only {
-  background: #fffacd;
+  background-color: #fffacd;
 }
+
 .summary-father-only {
-  background: #add8e6;
+  background-color: #add8e6;
 }
+
 .summary-both {
-  background: #ffc0cb;
+  background-color: #ffc0cb;
 }
 
-/* Filters */
-#filters {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-#filters label {
-  font-weight: bold;
-}
-#filterCaregiver,
-#filterChild {
-  margin: 0 8px 12px 0;
-  font-size: 14px;
-  padding: 4px;
-}
-
-/* === New Styles for Login Page === */
-.login-container {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 20px 30px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-.login-container form {
-  display: flex;
-  flex-direction: column;
-}
-.login-container label {
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-.login-container input[type="email"],
-.login-container input[type="password"] {
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-  transition: border-color 0.3s ease;
-}
-.login-container input[type="email"]:focus,
-.login-container input[type="password"]:focus {
-  outline: none;
-  border-color: #0096FF;
-}
-.login-container button {
-  padding: 12px;
-  background: #0096FF;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background 0.3s ease;
-}
-.login-container button:hover {
-  background: #007acc;
-}
-.login-container .toggle-auth {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 0.9em;
-  cursor: pointer;
-  color: #0096FF;
-  user-select: none;
-}
-.login-container .toggle-auth:hover {
-  text-decoration: underline;
-}
-.login-container .error-message {
-  color: #d9534f;
-  margin-bottom: 15px;
-  text-align: center;
-  font-weight: 600;
-}
-.login-container .success-message {
-  color: #28a745;
-  margin-bottom: 15px;
-  text-align: center;
-  font-weight: 600;
-}
-
-/* Responsive tweaks */
+/* Responsive */
 @media (max-width: 600px) {
-  #calendar, #summary {
-    max-width: 100%;
-    padding: 10px;
+  #calendar {
+    flex-direction: column;
+    gap: 30px;
   }
+
   .month-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
   }
-  .login-container {
-    margin: 40px 15px;
-    padding: 20px;
+
+  header button {
+    margin: 6px 4px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  #filters {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #filters label {
+    margin-bottom: 10px;
+  }
+
+  #summary table, #summary th, #summary td {
+    font-size: 0.9em;
   }
 }
