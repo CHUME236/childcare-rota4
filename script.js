@@ -92,7 +92,7 @@ function buildCalendars() {
 
     const first = new Date(year, m, 1).getDay();
     const daysIn = new Date(year, m + 1, 0).getDate();
-    const offset = (first + 6) % 7; // Convert Sunday=0 to Monday=0
+    const offset = (first + 6) % 7;
 
     for (let i = 0; i < offset; i++) {
       let e = document.createElement("div");
@@ -102,24 +102,28 @@ function buildCalendars() {
 
     for (let d = 1; d <= daysIn; d++) {
       const dateObj = new Date(year, m, d);
-      const month = String(m + 1).padStart(2, '0');
-      const day = String(d).padStart(2, '0');
+      const month = String(m + 1).padStart(2, "0");
+      const day = String(d).padStart(2, "0");
       const key = `${year}-${month}-${day}`;
 
       const cell = document.createElement("div");
       cell.className = "day";
 
-      // Add day number with ordinal suffix in top-left corner
-      const dayNumber = document.createElement("div");
-      dayNumber.className = "day-number";
-      dayNumber.textContent = getOrdinal(d);
-      cell.appendChild(dayNumber);
+      // Add date number with ordinal suffix
+      const dateNum = document.createElement("div");
+      dateNum.className = "day-number";
+      dateNum.textContent = d + getOrdinalSuffix(d);
+      cell.appendChild(dateNum);
 
       const drop = createSelect(["", "mother", "father"], "--Drop‑off--", key + "_dropoff");
       const pick = createSelect(["", "mother", "father"], "--Pick‑up--", key + "_pickup");
-      const app = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", key + "_appointment");
+      const app = createSelect(
+        ["", "dentist", "pe", "party", "swimming"],
+        "--Appointment--",
+        key + "_appointment"
+      );
 
-      [drop, pick, app].forEach(sel => {
+      [drop, pick, app].forEach((sel) => {
         sel.onchange = async () => {
           calendarData[sel._key] = sel.value;
           await saveUserData();
@@ -130,7 +134,7 @@ function buildCalendars() {
       const ivy = createCheckbox("Ivy", key + "_ivy");
       const ever = createCheckbox("Everly", key + "_everly");
 
-      [ivy, ever].forEach(ch => {
+      [ivy, ever].forEach((ch) => {
         ch.querySelector("input").onchange = async (e) => {
           calendarData[ch._key] = e.target.checked;
           await saveUserData();
@@ -146,7 +150,7 @@ function buildCalendars() {
         await saveUserData();
       };
 
-      [drop, pick, app, ivy, ever, txt].forEach(el => cell.appendChild(el));
+      [drop, pick, app, ivy, ever, txt].forEach((el) => cell.appendChild(el));
 
       drop.value = calendarData[key + "_dropoff"] || "";
       pick.value = calendarData[key + "_pickup"] || "";
@@ -167,7 +171,12 @@ function createSelect(opts, def, key) {
   const s = document.createElement("select");
   s._key = key;
   s.className = def.includes("Drop") ? "select-caregiver" : "select-appointment";
-  s.innerHTML = opts.map(o => `<option value="${o}"${o === "" ? " selected" : ""}>${o || def}</option>`).join("");
+  s.innerHTML = opts
+    .map(
+      (o) =>
+        `<option value="${o}"${o === "" ? " selected" : ""}>${o || def}</option>`
+    )
+    .join("");
   return s;
 }
 
@@ -183,121 +192,119 @@ function createCheckbox(label, key) {
 }
 
 function updateDay(cell) {
-  // Remove pickup/dropoff and appointment classes first
-  cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment");
-
+  ["mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment"].forEach((c) =>
+    cell.classList.remove(c)
+  );
   const [drop, pick, app] = cell.querySelectorAll("select");
   if (drop.value) cell.classList.add(`${drop.value}-dropoff`);
   if (pick.value) cell.classList.add(`${pick.value}-pickup`);
   if (app.value) cell.classList.add("has-appointment");
 }
 
-// Summary build function
 function buildSummary() {
   summaryBody.innerHTML = "";
 
-  const fc = filterCaregiver.value.toLowerCase();
-  const ch = filterChild.value.toLowerCase();
+  const filterCare = filterCaregiver.value;
+  const filterCh = filterChild.value;
 
-  const grouped = {};
+  Object.keys(calendarData)
+    .filter((key) => key.endsWith("_dropoff"))
+    .map((dropKey) => {
+      const dateKey = dropKey.slice(0, 10);
+      const dropVal = calendarData[dropKey];
+      const pickVal = calendarData[dateKey + "_pickup"] || "";
+      const appVal = calendarData[dateKey + "_appointment"] || "";
+      const ivyVal = calendarData[dateKey + "_ivy"] || false;
+      const everVal = calendarData[dateKey + "_everly"] || false;
+      const notesVal = calendarData[dateKey + "_comment"] || "";
 
-  for (const key in calendarData) {
-    const sepIndex = key.indexOf("_");
-    if (sepIndex === -1) continue;
+      // Filtering logic
+      if (
+        (filterCare !== "all" && ![dropVal, pickVal].includes(filterCare)) ||
+        (filterCh !== "all" &&
+          ((filterCh === "ivy" && !ivyVal) || (filterCh === "everly" && !everVal)))
+      ) {
+        return null;
+      }
 
-    const date = key.slice(0, sepIndex);
-    const field = key.slice(sepIndex + 1);
+      return {
+        dateKey,
+        dropVal,
+        pickVal,
+        appVal,
+        ivyVal,
+        everVal,
+        notesVal,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey))
+    .forEach((entry) => {
+      const tr = document.createElement("tr");
 
-    if (!grouped[date]) grouped[date] = {};
-    grouped[date][field] = calendarData[key];
-  }
-
-  const sortedDates = Object.keys(grouped).sort();
-
-  sortedDates.forEach(date => {
-    const day = grouped[date];
-
-    const caregiverMatch = fc === "all" || day.dropoff === fc || day.pickup === fc;
-    const childMatch = ch === "all" || day[ch] === true;
-
-    if (!caregiverMatch || !childMatch) return;
-
-    const tr = document.createElement("tr");
-
-    const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
-
-    tr.innerHTML = `
-      <td>${date}</td>
-      <td>${weekday}</td>
-      <td>${day.dropoff || ""}</td>
-      <td>${day.pickup || ""}</td>
-      <td>${day.appointment || ""}</td>
-      <td>${day.ivy ? "✔" : ""}</td>
-      <td>${day.everly ? "✔" : ""}</td>
-      <td>${day.comment || ""}</td>
-    `;
-
-    summaryBody.appendChild(tr);
-  });
+      const dateObj = new Date(entry.dateKey);
+      tr.innerHTML = `
+        <td>${entry.dateKey}</td>
+        <td>${dateObj.toLocaleDateString("en-US", { weekday: "long" })}</td>
+        <td>${entry.dropVal}</td>
+        <td>${entry.pickVal}</td>
+        <td>${entry.appVal}</td>
+        <td>${entry.ivyVal ? "✓" : ""}</td>
+        <td>${entry.everVal ? "✓" : ""}</td>
+        <td>${entry.notesVal}</td>
+      `;
+      summaryBody.appendChild(tr);
+    });
 }
 
 function exportCSV() {
   let csv = "Date,Weekday,Drop-off,Pick-up,Appointment,Ivy,Everly,Notes\n";
 
-  const fc = filterCaregiver.value.toLowerCase();
-  const ch = filterChild.value.toLowerCase();
+  Object.keys(calendarData)
+    .filter((key) => key.endsWith("_dropoff"))
+    .map((dropKey) => {
+      const dateKey = dropKey.slice(0, 10);
+      const dropVal = calendarData[dropKey];
+      const pickVal = calendarData[dateKey + "_pickup"] || "";
+      const appVal = calendarData[dateKey + "_appointment"] || "";
+      const ivyVal = calendarData[dateKey + "_ivy"] || false;
+      const everVal = calendarData[dateKey + "_everly"] || false;
+      const notesVal = calendarData[dateKey + "_comment"] || "";
 
-  const grouped = {};
-
-  for (const key in calendarData) {
-    const sepIndex = key.indexOf("_");
-    if (sepIndex === -1) continue;
-
-    const date = key.slice(0, sepIndex);
-    const field = key.slice(sepIndex + 1);
-
-    if (!grouped[date]) grouped[date] = {};
-    grouped[date][field] = calendarData[key];
-  }
-
-  const sortedDates = Object.keys(grouped).sort();
-
-  sortedDates.forEach(date => {
-    const day = grouped[date];
-
-    const caregiverMatch = fc === "all" || day.dropoff === fc || day.pickup === fc;
-    const childMatch = ch === "all" || day[ch] === true;
-
-    if (!caregiverMatch || !childMatch) return;
-
-    const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
-
-    csv += [
-      date,
-      weekday,
-      day.dropoff || "",
-      day.pickup || "",
-      day.appointment || "",
-      day.ivy ? "Yes" : "",
-      day.everly ? "Yes" : "",
-      `"${(day.comment || "").replace(/"/g, '""')}"`
-    ].join(",") + "\n";
-  });
+      return {
+        dateKey,
+        dropVal,
+        pickVal,
+        appVal,
+        ivyVal,
+        everVal,
+        notesVal,
+      };
+    })
+    .sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey))
+    .forEach((entry) => {
+      csv += `"${entry.dateKey}","${new Date(entry.dateKey).toLocaleDateString("en-US", { weekday: "long" })}","${entry.dropVal}","${entry.pickVal}","${entry.appVal}","${entry.ivyVal ? "Yes" : "No"}","${entry.everVal ? "Yes" : "No"}","${entry.notesVal.replace(/"/g, '""')}"\n`;
+    });
 
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = "childcare_rota.csv";
-  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-function getOrdinal(n) {
-  const s = ["th", "st", "nd", "rd"],
-        v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+function getOrdinalSuffix(n) {
+  if (n > 3 && n < 21) return "th";
+  switch (n % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
 }
