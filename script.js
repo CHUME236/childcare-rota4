@@ -193,7 +193,7 @@ function updateDay(cell) {
   if (app.value) cell.classList.add("has-appointment");
 }
 
-// UPDATED buildSummary function with fixes and improvements
+// UPDATED buildSummary function
 function buildSummary() {
   summaryBody.innerHTML = "";
 
@@ -218,7 +218,7 @@ function buildSummary() {
   sortedDates.forEach(date => {
     const day = grouped[date];
 
-    // Allow "all" option for filters, or filter by matching values
+    // Filter logic: allow "all" or matching caregiver and child
     const caregiverMatch = fc === "all" || day.dropoff === fc || day.pickup === fc;
     const childMatch = ch === "all" || day[ch] === true;
 
@@ -226,7 +226,7 @@ function buildSummary() {
 
     const tr = document.createElement("tr");
 
-    // Include weekday name in summary
+    // Include weekday name
     const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
 
     tr.innerHTML = `
