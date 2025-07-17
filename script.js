@@ -95,7 +95,7 @@ function buildCalendars() {
     const offset = (first + 6) % 7;
 
     for (let i = 0; i < offset; i++) {
-      let e = document.createElement("div");
+      const e = document.createElement("div");
       e.className = "day empty";
       grid.appendChild(e);
     }
@@ -127,9 +127,6 @@ function buildCalendars() {
           calendarData[sel._key] = sel.value;
           await saveUserData();
           updateDay(cell);
-          if (document.getElementById("summary").style.display === "block") {
-            buildSummary();
-          }
         };
       });
 
@@ -140,9 +137,6 @@ function buildCalendars() {
         ch.querySelector("input").onchange = async (e) => {
           calendarData[ch._key] = e.target.checked;
           await saveUserData();
-          if (document.getElementById("summary").style.display === "block") {
-            buildSummary();
-          }
         };
       });
 
@@ -153,9 +147,6 @@ function buildCalendars() {
       txt.oninput = async () => {
         calendarData[key + "_comment"] = txt.value;
         await saveUserData();
-        if (document.getElementById("summary").style.display === "block") {
-          buildSummary();
-        }
       };
 
       [drop, pick, app, ivy, ever, txt].forEach(el => cell.appendChild(el));
@@ -195,11 +186,16 @@ function createCheckbox(label, key) {
 }
 
 function updateDay(cell) {
-  ["mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup", "has-appointment"].forEach(c => cell.classList.remove(c));
-  const [drop, pick, app] = cell.querySelectorAll("select");
-  if (drop.value) cell.classList.add(`${drop.value}-dropoff`);
-  if (pick.value) cell.classList.add(`${pick.value}-pickup`);
-  if (app.value) cell.classList.add("has-appointment");
+  // Remove previous styles
+  cell.classList.remove("mother-dropoff", "father-dropoff", "mother-pickup", "father-pickup");
+  
+  const [drop, pick] = cell.querySelectorAll("select");
+
+  if (drop.value === "mother") cell.classList.add("mother-dropoff");
+  if (drop.value === "father") cell.classList.add("father-dropoff");
+
+  if (pick.value === "mother") cell.classList.add("mother-pickup");
+  if (pick.value === "father") cell.classList.add("father-pickup");
 }
 
 function buildSummary() {
@@ -232,7 +228,6 @@ function buildSummary() {
     if (!caregiverMatch || !childMatch) return;
 
     const tr = document.createElement("tr");
-
     const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
 
     tr.innerHTML = `
