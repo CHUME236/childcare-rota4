@@ -193,6 +193,7 @@ function updateDay(cell) {
   if (app.value) cell.classList.add("has-appointment");
 }
 
+// UPDATED buildSummary function with fixes and improvements
 function buildSummary() {
   summaryBody.innerHTML = "";
 
@@ -202,8 +203,12 @@ function buildSummary() {
   const grouped = {};
 
   for (const key in calendarData) {
-    const [date, field] = key.split("_");
-    if (!date || !field) continue;
+    const sepIndex = key.indexOf("_");
+    if (sepIndex === -1) continue;
+
+    const date = key.slice(0, sepIndex);
+    const field = key.slice(sepIndex + 1);
+
     if (!grouped[date]) grouped[date] = {};
     grouped[date][field] = calendarData[key];
   }
@@ -213,29 +218,27 @@ function buildSummary() {
   sortedDates.forEach(date => {
     const day = grouped[date];
 
-    const caregiverMatch = !fc || (day.dropoff === fc || day.pickup === fc);
-    const childMatch = !ch || day[ch] === true;
+    // Allow "all" option for filters, or filter by matching values
+    const caregiverMatch = fc === "all" || day.dropoff === fc || day.pickup === fc;
+    const childMatch = ch === "all" || day[ch] === true;
 
     if (!caregiverMatch || !childMatch) return;
 
     const tr = document.createElement("tr");
 
-    const dateTd = document.createElement("td");
-    dateTd.textContent = date;
-    tr.appendChild(dateTd);
+    // Include weekday name in summary
+    const weekday = new Date(date).toLocaleDateString(undefined, { weekday: 'long' });
 
-    const infoTd = document.createElement("td");
-    const info = [];
-
-    if (day.dropoff) info.push(`Drop-off: ${capitalize(day.dropoff)}`);
-    if (day.pickup) info.push(`Pick-up: ${capitalize(day.pickup)}`);
-    if (day.appointment) info.push(`Appointment: ${capitalize(day.appointment)}`);
-    if (day.ivy) info.push("Ivy");
-    if (day.everly) info.push("Everly");
-    if (day.comment) info.push(`Notes: ${day.comment}`);
-
-    infoTd.textContent = info.join(" | ");
-    tr.appendChild(infoTd);
+    tr.innerHTML = `
+      <td>${date}</td>
+      <td>${weekday}</td>
+      <td>${day.dropoff ? capitalize(day.dropoff) : ""}</td>
+      <td>${day.pickup ? capitalize(day.pickup) : ""}</td>
+      <td>${day.appointment ? capitalize(day.appointment) : ""}</td>
+      <td>${day.ivy ? "✓" : ""}</td>
+      <td>${day.everly ? "✓" : ""}</td>
+      <td>${day.comment || ""}</td>
+    `;
 
     summaryBody.appendChild(tr);
   });
@@ -250,14 +253,13 @@ function exportCSV() {
   for (const key in calendarData) {
     const val = calendarData[key];
     if (!val && val !== false) continue;
-    const [date, type] = key.split("_");
-    csv += `${date},${type},${val}\n`;
+    csv += `"${key}","${typeof val}","${val}"\n`;
   }
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "calendar.csv";
+  a.download = "calendar-export.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
