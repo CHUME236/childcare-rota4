@@ -48,93 +48,114 @@ h1 {
 
 #calendar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 20px;
+  gap: 40px;
+  overflow-x: auto;
+  padding-bottom: 10px;
 }
 
+/* Each month section */
 section {
   border: 1px solid #ccc;
-  padding: 10px;
-  width: 260px;
+  padding: 15px;
+  width: 360px;
   background: white;
   border-radius: 6px;
   box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 section h2 {
   text-align: center;
-  margin-bottom: 10px;
-  font-size: 18px;
+  margin-bottom: 15px;
+  font-size: 20px;
   color: #444;
+  font-weight: 600;
 }
 
+/* Grid for days */
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 8px;
 }
 
+/* Individual day boxes */
 .day {
   border: 1px solid #ddd;
   background: #fff;
-  min-height: 90px;
-  padding: 4px 4px 20px 4px;
+  min-height: 120px;
+  padding: 8px 6px 6px 6px;
   position: relative;
   display: flex;
   flex-direction: column;
-  font-size: 13px;
-  border-radius: 4px;
+  font-size: 14px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s ease;
+}
+
+.day:hover {
+  box-shadow: 0 0 8px #aaa;
 }
 
 .day.empty {
   background: #f0f0f0;
   border: none;
+  min-height: 120px;
 }
 
+/* Day number top-left */
 .day-number {
   position: absolute;
-  top: 3px;
-  left: 5px;
+  top: 5px;
+  left: 8px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   color: #555;
+  user-select: none;
 }
 
+/* Select inputs styling */
 .select-caregiver, .select-appointment {
-  font-size: 12px;
-  margin: 2px 0;
+  font-size: 13px;
+  margin: 6px 0 4px 0;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid #bbb;
-  padding: 2px 4px;
+  padding: 4px 6px;
 }
 
+/* Checkbox label */
 .checkbox-label {
-  font-size: 12px;
-  margin-top: 2px;
+  font-size: 13px;
+  margin-top: 6px;
   user-select: none;
 }
 
 .checkbox-label input {
-  margin-right: 5px;
+  margin-right: 6px;
   vertical-align: middle;
 }
 
+/* Notes textarea */
 .day-comment {
   margin-top: auto;
   width: 100%;
-  font-size: 12px;
-  border-radius: 3px;
+  font-size: 13px;
+  border-radius: 4px;
   border: 1px solid #ccc;
   resize: vertical;
-  min-height: 32px;
-  padding: 3px 4px;
+  min-height: 38px;
+  padding: 5px 6px;
   font-family: Arial, sans-serif;
 }
 
-/* Color styling for pickup selection */
+/* Pickup/dropoff color classes */
 .mother-pickup {
   background-color: #d0e8ff;
 }
@@ -143,7 +164,6 @@ section h2 {
   background-color: #ffd0d0;
 }
 
-/* Also style drop-off */
 .mother-dropoff {
   border: 2px solid #3399ff;
 }
@@ -174,4 +194,3 @@ th, td {
 th {
   background-color: #eee;
 }
-
