@@ -1,129 +1,168 @@
-/* === Base === */
+/* === Base Styling === */
 body {
   font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f4f8;
-  color: #333;
+  margin: 20px;
+  background: #f5f5f5;
 }
 
-header {
-  background: #4b7bec;
-  color: white;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-nav {
-  background: #dfe6e9;
-  padding: 1rem;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-button {
-  background: #4b7bec;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-/* === Calendar === */
-#calendar {
-  max-width: 900px;
-  margin: 20px auto;
-  display: block;
-}
-
-#calendar section {
-  background: white;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 30px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-}
-
-#calendar h2 {
+h1, h2 {
   text-align: center;
-  margin-bottom: 12px;
-  color: #2d3436;
 }
 
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
+.button-container {
+  text-align: center;
+  margin: 20px;
 }
 
-.day {
-  background: #f9f9f9;
-  border-radius: 6px;
-  padding: 10px;
+.button-container button {
+  margin: 0 5px;
+  padding: 8px 16px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+/* === Filters === */
+#filters {
   display: flex;
-  flex-direction: column;
-  min-height: 180px;
-}
-
-.week-overlay {
-  font-size: 0.8em;
-  font-weight: bold;
-  color: #636e72;
-  margin-bottom: 5px;
-}
-
-select, textarea {
-  margin: 4px 0;
-  padding: 4px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 0.9em;
-}
-
-textarea.day-comment {
-  resize: vertical;
-  min-height: 50px;
-}
-
-.checkbox-label {
-  font-size: 0.9em;
-  margin-top: 4px;
-}
-
-/* === Summary View === */
-#summary {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 1rem;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-.filters {
-  display: flex;
+  justify-content: center;
   gap: 20px;
   margin-bottom: 15px;
 }
 
-table {
+#filters label {
+  font-weight: bold;
+}
+
+#filterCaregiver,
+#filterChild {
+  font-size: 14px;
+  padding: 4px;
+}
+
+/* === Calendar Layout === */
+#calendar {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+section {
+  background: #fff;
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+
+/* === Month Grid === */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.day {
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ccc;
+  min-height: 160px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.day.empty {
+  background-color: #f9f9f9;
+  border: none;
+}
+
+/* === Week Overlay === */
+.week-overlay {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #222;
+  color: #fff;
+  font-size: 0.75em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.9;
+  user-select: none;
+}
+
+/* === Select Boxes === */
+.select-caregiver, .select-appointment {
+  width: 100%;
+  margin: 4px 0 8px 0;
+  padding: 6px;
+  font-size: 0.95em;
+}
+
+/* === Checkboxes & Notes === */
+.checkbox-label {
+  font-size: 0.9em;
+  margin: 4px 8px 4px 0;
+  display: inline-flex;
+  align-items: center;
+}
+.checkbox-label input {
+  margin-right: 4px;
+}
+
+.day-comment {
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px;
+  resize: vertical;
+  min-height: 40px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+  flex-grow: 1;
+}
+
+/* === Pick-up Visual Cues === */
+.mother-pickup {
+  background-color: #ffe0e9;
+}
+
+.father-pickup {
+  background-color: #d6eaff;
+}
+
+/* === Summary === */
+#summary {
+  max-width: 1000px;
+  margin: 20px auto;
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ccc;
+  display: none;
+}
+
+#summary table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95em;
 }
 
-thead {
-  background: #4b7bec;
-  color: white;
+#summary th, #summary td {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  text-align: center;
 }
 
-td, th {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
+thead {
+  background: #eee;
+}
+
+/* === Responsive === */
+@media (max-width: 600px) {
+  #calendar, #summary {
+    max-width: 100%;
+    padding: 10px;
+  }
+  .month-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
 }
