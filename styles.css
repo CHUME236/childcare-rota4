@@ -1,8 +1,7 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
   padding: 20px;
+  background: #f5f5f5;
   color: #333;
 }
 
@@ -13,26 +12,31 @@ h1 {
 
 .button-container {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .button-container button {
-  margin: 0 6px;
+  margin: 0 8px;
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
-  background: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid #999;
   border-radius: 4px;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.button-container button:hover {
+  background-color: #e0e0e0;
 }
 
 #filters {
   text-align: center;
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
 #filters label {
-  margin-right: 6px;
+  margin-right: 8px;
   font-weight: bold;
 }
 
@@ -44,56 +48,63 @@ h1 {
 
 #monthNavigation {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 #monthNavigation button {
+  margin: 0 10px;
   padding: 6px 14px;
   font-size: 14px;
   cursor: pointer;
-  background-color: #fff;
-  border: 1px solid #aaa;
   border-radius: 4px;
-  margin: 0 8px;
+  border: 1px solid #666;
+  background-color: #fafafa;
+  transition: background-color 0.3s ease;
+}
+
+#monthNavigation button:hover {
+  background-color: #ddd;
 }
 
 #monthLabel {
+  font-weight: 700;
   font-size: 18px;
-  font-weight: bold;
+  vertical-align: middle;
 }
 
 #calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto 40px auto;
 }
 
 .day-header {
   font-weight: bold;
   text-align: center;
-  padding: 8px;
-  background-color: #e3e3e3;
+  padding: 8px 0;
+  background-color: #d9d9d9;
   border-radius: 4px;
+  user-select: none;
 }
 
 .day {
-  background: #fff;
-  border: 1px solid #ccc;
+  background: white;
   border-radius: 6px;
-  padding: 10px;
+  padding: 10px 8px 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  min-height: 180px;
   font-size: 13px;
-  position: relative;
+  min-height: 180px;
   overflow: hidden;
+  position: relative;
 }
 
 .day.empty {
   background: transparent;
-  border: none;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -101,9 +112,10 @@ h1 {
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 6px;
-  color: #000;
+  color: #222;
 }
 
+/* Select and textarea */
 .day select,
 .day textarea {
   font-size: 12px;
@@ -123,17 +135,20 @@ h1 {
 }
 
 .day label {
+  font-weight: normal;
   font-size: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
-.day label input {
+.day label input[type="checkbox"] {
   margin-right: 6px;
+  cursor: pointer;
 }
 
-/* Color styling for caregivers */
+/* Color coding */
 .mother-dropoff {
   border-left: 4px solid #4a90e2;
 }
@@ -150,42 +165,50 @@ h1 {
   border-right: 4px solid #e27a4a;
 }
 
-/* Summary Table */
-#summary {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #ccc;
-}
-
-#summary h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#summary table {
+/* Summary table */
+table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 15px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
   font-size: 14px;
 }
 
-#summary th,
-#summary td {
+thead tr {
+  background-color: #4a90e2;
+  color: white;
+}
+
+th, td {
   padding: 8px 10px;
   border: 1px solid #ddd;
   text-align: center;
+  vertical-align: middle;
 }
 
-#summary thead {
-  background: #4a90e2;
-  color: #fff;
-}
-
-#summary tbody tr:nth-child(odd) {
+tbody tr:nth-child(odd) {
   background-color: #f9f9f9;
 }
 
-#summary tbody tr:hover {
+tbody tr:hover {
   background-color: #e3f0fc;
+  cursor: default;
+}
+
+/* Responsive tweaks */
+@media (max-width: 800px) {
+  #calendar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .day {
+    min-height: 160px;
+  }
+  .button-container button,
+  #monthNavigation button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
 }
