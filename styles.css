@@ -72,16 +72,16 @@ h1 {
   vertical-align: middle;
 }
 
-#calendar {
+.month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  max-width: 1000px;
+  max-width: 960px;
   margin: 0 auto 40px auto;
 }
 
 .day-header {
-  font-weight: bold;
+  font-weight: 700;
   text-align: center;
   padding: 8px 0;
   background-color: #d9d9d9;
@@ -115,7 +115,7 @@ h1 {
   color: #222;
 }
 
-/* Select and textarea */
+/* Select and checkbox styling inside day cells */
 .day select,
 .day textarea {
   font-size: 12px;
@@ -148,19 +148,18 @@ h1 {
   cursor: pointer;
 }
 
-/* Color coding */
+/* Color coding for drop-off */
 .mother-dropoff {
   border-left: 4px solid #4a90e2;
 }
-
 .father-dropoff {
   border-left: 4px solid #e27a4a;
 }
 
+/* Color coding for pick-up */
 .mother-pickup {
   border-right: 4px solid #4a90e2;
 }
-
 .father-pickup {
   border-right: 4px solid #e27a4a;
 }
@@ -199,9 +198,9 @@ tbody tr:hover {
 
 /* Responsive tweaks */
 @media (max-width: 800px) {
-  #calendar {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  .month-grid {
+    max-width: 100%;
+    gap: 6px;
   }
   .day {
     min-height: 160px;
