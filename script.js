@@ -1,77 +1,100 @@
-function renderCalendar(month, year) {
-  calendarEl.innerHTML = "";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
 
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const firstWeekday = firstDay.getDay();
-  const daysInMonth = lastDay.getDate();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  const grid = document.createElement("div");
-  grid.className = "month-grid";
+let calendarData = {};
+let currentUser = null;
 
-  // Add headers
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  dayNames.forEach(day => {
-    const header = document.createElement("div");
-    header.className = "day-header";
-    header.textContent = day;
-    grid.appendChild(header);
-  });
+const calendarEl = document.getElementById("calendar");
+const summaryBody = document.getElementById("summaryBody");
+const filterCaregiver = document.getElementById("filterCaregiver");
+const filterChild = document.getElementById("filterChild");
+const logoutBtn = document.getElementById("logoutBtn");
 
-  const offset = firstWeekday;
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 
-  for (let i = 0; i < offset; i++) {
-    const emptyCell = document.createElement("div");
-    emptyCell.className = "day empty";
-    grid.appendChild(emptyCell);
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    await loadCalendarData();
+    renderCalendar(currentMonth, currentYear);
+    setupButtons();
+  } else {
+    window.location.href = "login.html";
   }
+});
 
-  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
-    const cell = document.createElement("div");
-    cell.className = "day";
+logoutBtn.onclick = () => signOut(auth);
 
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
-    const dayData = {
-      dropoff: calendarData[dateStr + "_dropoff"] || "",
-      pickup: calendarData[dateStr + "_pickup"] || "",
-      appointment: calendarData[dateStr + "_appointment"] || "",
-      ivy: calendarData[dateStr + "_ivy"] || false,
-      everly: calendarData[dateStr + "_everly"] || false,
-      comment: calendarData[dateStr + "_comment"] || ""
-    };
+function setupButtons() {
+  document.getElementById("showCalendarBtn").onclick = () => {
+    document.getElementById("calendar").style.display = "block";
+    document.getElementById("summary").style.display = "none";
+  };
+  document.getElementById("showSummaryBtn").onclick = () => {
+    document.getElementById("calendar").style.display = "none";
+    document.getElementById("summary").style.display = "block";
+    buildSummary();
+  };
+  document.getElementById("exportCsvBtn").onclick = exportCSV;
+  filterCaregiver.onchange = buildSummary;
+  filterChild.onchange = buildSummary;
+  document.getElementById("prevMonthBtn").onclick = () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderCalendar(currentMonth, currentYear);
+  };
+  document.getElementById("nextMonthBtn").onclick = () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderCalendar(currentMonth, currentYear);
+  };
+}
 
-    const dateNumber = document.createElement("div");
-    dateNumber.className = "date-number";
-    dateNumber.textContent = dayNum;
-    cell.appendChild(dateNumber);
-
-    const dropoff = createSelect(["", "mother", "father"], "--Drop-off--", dateStr + "_dropoff", dayData.dropoff);
-    const pickup = createSelect(["", "mother", "father"], "--Pick-up--", dateStr + "_pickup", dayData.pickup);
-    const appointment = createSelect(["", "dentist", "pe", "party", "swimming"], "--Appointment--", dateStr + "_appointment", dayData.appointment);
-
-    const ivy = createCheckbox("Ivy", dateStr + "_ivy", dayData.ivy);
-    const everly = createCheckbox("Everly", dateStr + "_everly", dayData.everly);
-
-    const notes = document.createElement("textarea");
-    notes.placeholder = "Notes...";
-    notes.value = dayData.comment;
-    notes.oninput = async () => {
-      calendarData[dateStr + "_comment"] = notes.value;
-      await saveCalendarData();
-    };
-
-    [dropoff, pickup, appointment, ivy, everly, notes].forEach(el => cell.appendChild(el));
-    updateDayStyle(cell, dropoff.value, pickup.value);
-
-    grid.appendChild(cell);
+async function loadCalendarData() {
+  const docRef = doc(db, "sharedCalendar", "main");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    calendarData = docSnap.data().calendarData || {};
+  } else {
+    calendarData = {};
   }
+}
 
-  calendarEl.appendChild(grid);
+async function saveCalendarData() {
+  await setDoc(doc(db, "sharedCalendar", "main"), { calendarData });
 }
 function createSelect(options, defaultText, key, selectedValue) {
   const select = document.createElement("select");
